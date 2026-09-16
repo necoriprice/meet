@@ -98,30 +98,48 @@ footer a:hover {
   content: '終了';
 }
 
-/* 画面共有ボタンは目立つように緑色にする */
+/* PreJoin画面の「Join Room」ボタンも日本語化する */
+.lk-join-button {
+  font-size: 0;
+}
+
+.lk-join-button::before {
+  content: '参加';
+  font-size: 1rem;
+}
+
+/*
+ * 画面共有ボタンは「終了」ボタンと同じ、文字・アイコン・枠線を色付けし
+ * 背景は通常のボタンと同じ濃い色のままにする「アウトライン」スタイルにする。
+ * 実際に共有中(enabled=true)は塗りつぶしの緑にして目立たせる。
+ */
 [data-lk-source='screen_share'] {
-  background-color: #16a34a !important;
+  color: #22c55e !important;
+  border: 1px solid #22c55e !important;
+  background-color: var(--lk-control-bg) !important;
 }
 
 [data-lk-source='screen_share']:not(:disabled):hover {
-  background-color: #15803d !important;
+  background-color: var(--lk-control-hover-bg) !important;
 }
 
 [data-lk-source='screen_share'][data-lk-enabled='true'] {
+  color: #fff !important;
   background-color: #22c55e !important;
+  border-color: #22c55e !important;
+}
+
+[data-lk-source='screen_share'][data-lk-enabled='true']:hover {
+  background-color: #16a34a !important;
 }
 
 /*
  * マイク・カメラをオフにした状態が分かりにくい(見た目がほぼ変わらない)との
- * 指摘のため、オフ時は赤系の背景色にしてひと目で分かるようにする。
+ * 指摘のため、オフ時はアイコンだけ赤くしてひと目で分かるようにする
+ * (ボタン自体の背景・文字色は変えず、アイコンのcurrentColorだけ上書きする)。
  * PreJoin画面・通話中コントロールバーの両方に適用される。
  */
-[data-lk-source='microphone'][data-lk-enabled='false'],
-[data-lk-source='camera'][data-lk-enabled='false'] {
-  background-color: #d64958 !important;
-}
-
-[data-lk-source='microphone'][data-lk-enabled='false']:hover,
-[data-lk-source='camera'][data-lk-enabled='false']:hover {
-  background-color: #c53a49 !important;
+[data-lk-source='microphone'][data-lk-enabled='false'] > svg,
+[data-lk-source='camera'][data-lk-enabled='false'] > svg {
+  color: #d64958;
 }

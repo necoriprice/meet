@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { generateRoomId } from '@/lib/client-utils';
@@ -21,17 +21,46 @@ function extractRoomId(input: string): string {
   return trimmed;
 }
 
+const JOIN_HISTORY_KEY = 'riprice-meet-join-history';
+const JOIN_HISTORY_MAX = 10;
+
+function loadJoinHistory(): string[] {
+  try {
+    const raw = window.localStorage.getItem(JOIN_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveJoinHistory(roomId: string, previous: string[]): string[] {
+  const next = [roomId, ...previous.filter((id) => id !== roomId)].slice(0, JOIN_HISTORY_MAX);
+  try {
+    window.localStorage.setItem(JOIN_HISTORY_KEY, JSON.stringify(next));
+  } catch {
+    // ブラウザ側の制限等で保存に失敗しても致命的ではないため無視する
+  }
+  return next;
+}
+
 export default function Page() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const email = session?.user?.email?.toLowerCase();
   const fixedRoomId = email ? FIXED_ROOM_BY_EMAIL[email]?.roomId : undefined;
   const [joinInput, setJoinInput] = useState('');
+  const [joinHistory, setJoinHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    setJoinHistory(loadJoinHistory());
+  }, []);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     const roomId = extractRoomId(joinInput);
     if (!roomId) return;
+    saveJoinHistory(roomId, joinHistory);
     router.push(`/rooms/${encodeURIComponent(roomId)}`);
   };
 
@@ -77,10 +106,16 @@ export default function Page() {
               <input
                 className={styles.joinInput}
                 type="text"
+                list="join-room-history"
                 placeholder="例: honsha-room-1"
                 value={joinInput}
                 onChange={(e) => setJoinInput(e.target.value)}
               />
+              <datalist id="join-room-history">
+                {joinHistory.map((roomId) => (
+                  <option key={roomId} value={roomId} />
+                ))}
+              </datalist>
               <button className="lk-button" type="submit" disabled={!joinInput.trim()}>
                 参加
               </button>
