@@ -148,11 +148,20 @@ footer a:hover {
  * スマホ幅ではコントロールバーの日本語ラベルが5個並ぶと画面からはみ出すため、
  * 狭い画面ではアイコンのみの表示に切り替える(機能自体はアイコンのみでも
  * 変わらず使える)。
+ * マイク・カメラの入力デバイス切替(chevron)ボタンは他のボタンより幅が狭く
+ * 余計な1個として並ぶとアイコンの間隔が不揃いに見えるため、スマホ幅では
+ * 非表示にし、残り5個のアイコンをspace-evenlyで均等配置する。
  */
 @media (max-width: 600px) {
   .lk-control-bar {
-    gap: 0.25rem;
-    padding-inline: 0.5rem;
+    display: flex;
+    justify-content: space-evenly;
+    gap: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .lk-control-bar .lk-button-menu {
+    display: none;
   }
 
   .lk-control-bar [data-lk-source='microphone'],
@@ -161,6 +170,7 @@ footer a:hover {
   .lk-control-bar .lk-chat-toggle,
   .lk-control-bar .lk-disconnect-button {
     padding: 0.5rem;
+    flex: 0 1 auto;
   }
 
   .lk-control-bar [data-lk-source='microphone']::before,

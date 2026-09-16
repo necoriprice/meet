@@ -83,21 +83,40 @@ export function PageClientImpl(props: {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             height: '100%',
-            gap: '0.75rem',
+            overflowY: 'auto',
+            padding: '1.5rem 1rem',
           }}
         >
-          <PreJoin
-            defaults={preJoinDefaults}
-            onSubmit={handlePreJoinSubmit}
-            onError={handlePreJoinError}
-          />
-          <button className="lk-button" onClick={() => router.push('/')}>
-            キャンセル
-          </button>
+          {/*
+            margin: 'auto' で親のflexコンテナ内に縦横センタリングしつつ、
+            画面が低くて収まりきらない場合は上詰め+スクロールに自然に切り替わる
+            (justifyContent:'center'だと収まらない分が見切れてしまうため)
+          */}
+          <div
+            style={{
+              margin: 'auto',
+              width: '100%',
+              maxWidth: '480px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              gap: '0.75rem',
+            }}
+          >
+            <PreJoin
+              defaults={preJoinDefaults}
+              onSubmit={handlePreJoinSubmit}
+              onError={handlePreJoinError}
+            />
+            <button
+              className="lk-button"
+              style={{ width: '100%' }}
+              onClick={() => router.push('/')}
+            >
+              キャンセル
+            </button>
+          </div>
         </div>
       ) : (
         <VideoConferenceComponent
