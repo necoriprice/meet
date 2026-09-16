@@ -28,6 +28,7 @@ import {
 } from 'livekit-client';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 
@@ -47,8 +48,12 @@ export function PageClientImpl(props: {
     undefined,
   );
   const preJoinDefaults = React.useMemo(() => {
+    const email = session?.user?.email?.toLowerCase();
+    // honsha1等の拠点共有アカウントは個人名でなくルーム名を表示名の初期値にする。
+    // それ以外(Google Workspaceでログインする社員)は本人の名前を使う
+    const roomLabel = email ? FIXED_ROOM_BY_EMAIL[email]?.label : undefined;
     return {
-      username: session?.user?.name ?? session?.user?.email ?? '',
+      username: roomLabel ?? session?.user?.name ?? session?.user?.email ?? '',
       videoEnabled: true,
       audioEnabled: true,
     };
