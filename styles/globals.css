@@ -46,3 +46,54 @@ footer a {
 footer a:hover {
   text-decoration-color: #009fe8;
 }
+
+/*
+ * 通話中のコントロールバー(マイク・カメラ・画面共有・チャット・終了)を日本語化する。
+ * @livekit/components-reactに文言のカスタマイズ機能がないためCSSで対応している。
+ * 元のテキストはfont-size:0で見えなくし、アイコンとの並び順はflexのorderで維持する。
+ * ::afterはチャットの未読バッジ表示に使われているため、ラベルは::beforeを使う。
+ */
+.lk-control-bar [data-lk-source='microphone'],
+.lk-control-bar [data-lk-source='camera'],
+.lk-control-bar [data-lk-source='screen_share'],
+.lk-control-bar .lk-chat-toggle,
+.lk-control-bar .lk-disconnect-button {
+  font-size: 0;
+}
+
+.lk-control-bar [data-lk-source='microphone'] > svg,
+.lk-control-bar [data-lk-source='camera'] > svg,
+.lk-control-bar [data-lk-source='screen_share'] > svg,
+.lk-control-bar .lk-chat-toggle > svg,
+.lk-control-bar .lk-disconnect-button > svg {
+  order: 1;
+}
+
+.lk-control-bar [data-lk-source='microphone']::before,
+.lk-control-bar [data-lk-source='camera']::before,
+.lk-control-bar [data-lk-source='screen_share']::before,
+.lk-control-bar .lk-chat-toggle::before,
+.lk-control-bar .lk-disconnect-button::before {
+  order: 2;
+  font-size: 0.9rem;
+}
+
+.lk-control-bar [data-lk-source='microphone']::before {
+  content: 'マイク';
+}
+
+.lk-control-bar [data-lk-source='camera']::before {
+  content: 'カメラ';
+}
+
+.lk-control-bar [data-lk-source='screen_share']::before {
+  content: '画面共有';
+}
+
+.lk-control-bar .lk-chat-toggle::before {
+  content: 'チャット';
+}
+
+.lk-control-bar .lk-disconnect-button::before {
+  content: '終了';
+}
