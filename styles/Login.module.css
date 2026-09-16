@@ -2,75 +2,94 @@
   display: grid;
   place-items: center;
   min-height: 100vh;
-  background-color: #0b0b0b;
+  padding-block: 2rem;
+  background-color: #f4f5f7;
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  max-width: 380px;
-  padding: 2rem;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
   margin-inline: 1rem;
-  background-color: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.08);
 }
 
-.headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+.logo {
+  border-radius: 16px;
 }
 
 .title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #009fe8;
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.subtitle {
+  margin: 0 0 1.75rem;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #666;
 }
 
 .googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   width: 100%;
-  padding: 0.65rem;
+  padding: 0.7rem;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #111;
+  color: #333;
   background-color: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid #dadce0;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .googleButton:hover {
-  background-color: #f2f2f2;
+  background-color: #f7f7f7;
+}
+
+.googleIcon {
+  width: 20px;
+  height: 20px;
 }
 
 .divider {
-  margin: 1rem 0;
+  width: 100%;
+  margin: 1.25rem 0;
   text-align: center;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #999;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  width: 100%;
+  gap: 0.4rem;
 }
 
 .label {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #333;
   margin-top: 0.75rem;
 }
 
 .input {
-  padding: 0.65rem 0.75rem;
+  padding: 0.7rem 0.85rem;
   font-size: 1rem;
   background-color: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid #d5d7dc;
   border-radius: 8px;
   color: #111;
 }
@@ -78,17 +97,46 @@
 .input:focus {
   outline: none;
   border-color: #009fe8;
+  box-shadow: 0 0 0 3px rgba(0, 159, 232, 0.15);
+}
+
+.passwordField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordField .input {
+  width: 100%;
+  padding-right: 3.5rem;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: #009fe8;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.helpText {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #009fe8;
 }
 
 .error {
   margin: 0.75rem 0 0;
   font-size: 0.85rem;
-  color: #ff8a8a;
+  color: #d64958;
 }
 
 .submitButton {
   margin-top: 1.5rem;
-  padding: 0.75rem;
+  padding: 0.8rem;
   font-size: 1rem;
   font-weight: bold;
   color: #fff;
