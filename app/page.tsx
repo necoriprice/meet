@@ -19,17 +19,6 @@ const FIXED_ROOM_BY_EMAIL: Record<string, string> = {
   'oosaka3@riprice.co.jp': 'oosaka-room-3',
 };
 
-// アプリ側(NextAuth)のセッションだけ切ってもCognito Hosted UI側のSSOセッションが
-// 残っており、再ログイン時に同じアカウントへ自動的に通ってしまう。
-// Cognitoのログアウトエンドポイントも呼んで完全にログアウトする。
-async function logout() {
-  await signOut({ redirect: false });
-  const domain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
-  const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
-  const logoutUri = window.location.origin;
-  window.location.href = `https://${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-}
-
 export default function Page() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -75,7 +64,7 @@ export default function Page() {
           <div className={styles.accountBar}>
             <span>{session.user.email}</span>
             <a href="/usage">利用状況</a>
-            <button className="lk-button" onClick={() => logout()}>
+            <button className="lk-button" onClick={() => signOut({ callbackUrl: '/' })}>
               ログアウト
             </button>
           </div>
