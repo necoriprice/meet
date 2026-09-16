@@ -5,8 +5,15 @@ export default auth((req) => {
   if (!req.auth) {
     const loginUrl = new URL('/login', req.url);
     loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname + req.nextUrl.search);
-    return NextResponse.redirect(loginUrl);
+    const res = NextResponse.redirect(loginUrl);
+    // ブラウザの「戻る」操作がこのリダイレクト応答をキャッシュから再利用し、
+    // ログイン済みでもログイン画面に戻ってしまう問題を防ぐ
+    res.headers.set('Cache-Control', 'no-store');
+    return res;
   }
+  const res = NextResponse.next();
+  res.headers.set('Cache-Control', 'no-store');
+  return res;
 });
 
 export const config = {
