@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
 import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand,
@@ -13,6 +14,9 @@ const COGNITO_REGION = process.env.COGNITO_ISSUER?.match(/cognito-idp\.([^.]+)\.
 
 const cognitoClient = new CognitoIdentityProviderClient({ region: COGNITO_REGION });
 
+// 社員のGoogle Workspaceドメイン。このドメインのアカウントのみログインを許可する
+const GOOGLE_WORKSPACE_DOMAIN = 'riprice.co.jp';
+
 function computeSecretHash(username: string) {
   return createHmac('sha256', COGNITO_CLIENT_SECRET)
     .update(username + COGNITO_CLIENT_ID)
@@ -25,7 +29,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/login',
   },
+  callbacks: {
+    async signIn({ account, profile }) {
+      if (account?.provider === 'google') {
+        // hdはリクエスト時のヒントに過ぎないため、返ってきたprofileの値を必ず検証する
+        return profile?.hd === GOOGLE_WORKSPACE_DOMAIN;
+      }
+      return true;
+    },
+  },
   providers: [
+    Google({
+      authorization: {
+        params: { hd: GOOGLE_WORKSPACE_DOMAIN },
+      },
+    }),
     Credentials({
       credentials: {
         email: {},

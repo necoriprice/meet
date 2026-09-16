@@ -31,6 +31,29 @@
   color: #009fe8;
 }
 
+.googleButton {
+  width: 100%;
+  padding: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.googleButton:hover {
+  background-color: #f2f2f2;
+}
+
+.divider {
+  margin: 1rem 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .form {
   display: flex;
   flex-direction: column;

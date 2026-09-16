@@ -52,6 +52,14 @@ function LoginForm() {
           />
           <h1 className={styles.title}>RIPRICE Meet</h1>
         </div>
+        <button
+          className={styles.googleButton}
+          type="button"
+          onClick={() => signIn('google', { callbackUrl })}
+        >
+          Googleでログイン
+        </button>
+        <div className={styles.divider}>または</div>
         <form className={styles.form} onSubmit={onSubmit}>
           <label className={styles.label} htmlFor="email">
             メールアドレス
