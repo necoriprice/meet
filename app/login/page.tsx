@@ -44,13 +44,16 @@ function LoginForm() {
   return (
     <main className={styles.main}>
       <div className={styles.card}>
-        <img
-          className={styles.logo}
-          src="/images/riprice/riprice-meet-logo-256.png"
-          alt="RIPRICE Meet"
-          width="72"
-          height="72"
-        />
+        <div className={styles.brandRow}>
+          <img
+            className={styles.logo}
+            src="/images/riprice/riprice-meet-logo-256.png"
+            alt="RIPRICE Meet"
+            width="48"
+            height="48"
+          />
+          <span className={styles.brandName}>RIPRICE Meet</span>
+        </div>
         <h1 className={styles.title}>ログイン</h1>
         <p className={styles.subtitle}>
           RIPRICE Meetを利用するには
