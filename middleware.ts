@@ -19,5 +19,9 @@ export default auth((req) => {
 export const config = {
   // api/webhooks: LiveKitサーバーからの直接呼び出し(Cognitoセッションを持たない)。
   // 署名検証はルートハンドラ側(WebhookReceiver)で行う
-  matcher: ['/((?!api/auth|api/webhooks|login|_next/static|_next/image|favicon.ico|images).*)'],
+  // manifest.webmanifest・sw.js: PWAとしてブラウザが未ログイン状態でも
+  // 取得できる必要があるファイル
+  matcher: [
+    '/((?!api/auth|api/webhooks|login|_next/static|_next/image|favicon.ico|images|manifest.webmanifest|sw.js).*)',
+  ],
 };

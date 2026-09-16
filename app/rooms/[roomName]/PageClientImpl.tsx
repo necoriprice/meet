@@ -43,6 +43,7 @@ export function PageClientImpl(props: {
   codec: VideoCodec;
   singlePeerConnection: boolean;
 }) {
+  const router = useRouter();
   const { data: session } = useSession();
   const [preJoinChoices, setPreJoinChoices] = React.useState<LocalUserChoices | undefined>(
     undefined,
@@ -79,12 +80,24 @@ export function PageClientImpl(props: {
   return (
     <main data-lk-theme="default" style={{ height: '100%' }}>
       {connectionDetails === undefined || preJoinChoices === undefined ? (
-        <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            gap: '0.75rem',
+          }}
+        >
           <PreJoin
             defaults={preJoinDefaults}
             onSubmit={handlePreJoinSubmit}
             onError={handlePreJoinError}
           />
+          <button className="lk-button" onClick={() => router.push('/')}>
+            キャンセル
+          </button>
         </div>
       ) : (
         <VideoConferenceComponent

@@ -4,6 +4,7 @@ import '@livekit/components-styles/prefabs';
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'react-hot-toast';
 import { Providers } from './providers';
+import { ServiceWorkerRegister } from './ServiceWorkerRegister';
 
 export const metadata: Metadata = {
   title: {
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
     template: '%s',
   },
   description: 'リプライス株式会社 社内向けビデオ会議システム',
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: {
       rel: 'icon',
@@ -19,8 +21,8 @@ export const metadata: Metadata = {
     apple: [
       {
         rel: 'apple-touch-icon',
-        url: '/images/riprice/riprice-meet-logo-256.png',
-        sizes: '256x256',
+        url: '/images/riprice/riprice-meet-icon-192.png',
+        sizes: '192x192',
       },
     ],
   },
@@ -35,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body data-lk-theme="default">
         <Toaster />
+        <ServiceWorkerRegister />
         <Providers>{children}</Providers>
       </body>
     </html>

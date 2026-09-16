@@ -143,3 +143,31 @@ footer a:hover {
 [data-lk-source='camera'][data-lk-enabled='false'] > svg {
   color: #d64958;
 }
+
+/*
+ * スマホ幅ではコントロールバーの日本語ラベルが5個並ぶと画面からはみ出すため、
+ * 狭い画面ではアイコンのみの表示に切り替える(機能自体はアイコンのみでも
+ * 変わらず使える)。
+ */
+@media (max-width: 600px) {
+  .lk-control-bar {
+    gap: 0.25rem;
+    padding-inline: 0.5rem;
+  }
+
+  .lk-control-bar [data-lk-source='microphone'],
+  .lk-control-bar [data-lk-source='camera'],
+  .lk-control-bar [data-lk-source='screen_share'],
+  .lk-control-bar .lk-chat-toggle,
+  .lk-control-bar .lk-disconnect-button {
+    padding: 0.5rem;
+  }
+
+  .lk-control-bar [data-lk-source='microphone']::before,
+  .lk-control-bar [data-lk-source='camera']::before,
+  .lk-control-bar [data-lk-source='screen_share']::before,
+  .lk-control-bar .lk-chat-toggle::before,
+  .lk-control-bar .lk-disconnect-button::before {
+    display: none;
+  }
+}

@@ -21,34 +21,6 @@ function extractRoomId(input: string): string {
   return trimmed;
 }
 
-const JOIN_HISTORY_MAX = 10;
-
-// アカウント(メールアドレス)ごとに履歴を分ける。同じPC・ブラウザを複数アカウントで
-// 使い回すケース(拠点共有PC等)があるため、ブラウザ単位ではなくアカウント単位にする
-function joinHistoryKey(email: string): string {
-  return `riprice-meet-join-history:${email}`;
-}
-
-function loadJoinHistory(email: string): string[] {
-  try {
-    const raw = window.localStorage.getItem(joinHistoryKey(email));
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveJoinHistory(email: string, roomId: string, previous: string[]): string[] {
-  const next = [roomId, ...previous.filter((id) => id !== roomId)].slice(0, JOIN_HISTORY_MAX);
-  try {
-    window.localStorage.setItem(joinHistoryKey(email), JSON.stringify(next));
-  } catch {
-    // ブラウザ側の制限等で保存に失敗しても致命的ではないため無視する
-  }
-  return next;
-}
-
 export default function Page() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -56,18 +28,44 @@ export default function Page() {
   const fixedRoomId = email ? FIXED_ROOM_BY_EMAIL[email]?.roomId : undefined;
   const [joinInput, setJoinInput] = useState('');
   const [joinHistory, setJoinHistory] = useState<string[]>([]);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [checkingRoom, setCheckingRoom] = useState(false);
 
   useEffect(() => {
-    if (email) {
-      setJoinHistory(loadJoinHistory(email));
-    }
+    if (!email) return;
+    fetch('/api/join-history')
+      .then((res) => (res.ok ? res.json() : { history: [] }))
+      .then((data) => setJoinHistory(data.history ?? []))
+      .catch(() => {});
   }, [email]);
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setJoinError(null);
     const roomId = extractRoomId(joinInput);
     if (!roomId || !email) return;
-    saveJoinHistory(email, roomId, joinHistory);
+
+    setCheckingRoom(true);
+    try {
+      const res = await fetch(`/api/room-exists?roomName=${encodeURIComponent(roomId)}`);
+      const data = await res.json();
+      if (!data.exists) {
+        setJoinError('ミーティングルームが見つかりません');
+        return;
+      }
+    } catch {
+      setJoinError('確認に失敗しました。もう一度お試しください。');
+      return;
+    } finally {
+      setCheckingRoom(false);
+    }
+
+    // 履歴保存はベストエフォート(失敗しても参加自体は続行する)
+    fetch('/api/join-history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId }),
+    }).catch(() => {});
     router.push(`/rooms/${encodeURIComponent(roomId)}`);
   };
 
@@ -123,10 +121,11 @@ export default function Page() {
                   <option key={roomId} value={roomId} />
                 ))}
               </datalist>
-              <button className="lk-button" type="submit" disabled={!joinInput.trim()}>
-                参加
+              <button className="lk-button" type="submit" disabled={!joinInput.trim() || checkingRoom}>
+                {checkingRoom ? '確認中...' : '参加'}
               </button>
             </form>
+            {joinError && <p className={styles.joinError}>{joinError}</p>}
           </div>
         )}
         {session?.user?.email && (
