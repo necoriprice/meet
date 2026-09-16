@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     default: 'RIPRICE Meet',
     template: '%s',
   },
-  description: 'リプライス株式会社 社内向けリモート接客ビデオ会議システム',
+  description: 'リプライス株式会社 社内向けビデオ会議システム',
   icons: {
     icon: {
       rel: 'icon',

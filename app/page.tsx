@@ -38,7 +38,7 @@ export default function Page() {
             />
             <h1 className={styles.appTitle}>RIPRICE Meet</h1>
           </div>
-          <p className={styles.tagline}>社内向けリモート接客ビデオ会議システム</p>
+          <p className={styles.tagline}>社内向けビデオ会議システム</p>
         </div>
         {status !== 'loading' && (
           <div className={styles.tabContent}>
