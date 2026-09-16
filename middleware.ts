@@ -10,5 +10,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ['/((?!api/auth|login|_next/static|_next/image|favicon.ico|images).*)'],
+  // api/webhooks: LiveKitサーバーからの直接呼び出し(Cognitoセッションを持たない)。
+  // 署名検証はルートハンドラ側(WebhookReceiver)で行う
+  matcher: ['/((?!api/auth|api/webhooks|login|_next/static|_next/image|favicon.ico|images).*)'],
 };

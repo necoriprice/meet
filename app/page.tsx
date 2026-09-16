@@ -63,6 +63,7 @@ export default function Page() {
         {session?.user?.email && (
           <div className={styles.accountBar}>
             <span>{session.user.email}</span>
+            <a href="/usage">利用状況</a>
             <button className="lk-button" onClick={() => signOut({ callbackUrl: '/' })}>
               ログアウト
             </button>
