@@ -3,6 +3,7 @@ import '@livekit/components-styles';
 import '@livekit/components-styles/prefabs';
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'react-hot-toast';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: {
@@ -53,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body data-lk-theme="default">
         <Toaster />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

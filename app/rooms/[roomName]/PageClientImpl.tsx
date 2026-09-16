@@ -27,6 +27,7 @@ import {
   VideoCaptureOptions,
 } from 'livekit-client';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 
@@ -41,16 +42,17 @@ export function PageClientImpl(props: {
   codec: VideoCodec;
   singlePeerConnection: boolean;
 }) {
+  const { data: session } = useSession();
   const [preJoinChoices, setPreJoinChoices] = React.useState<LocalUserChoices | undefined>(
     undefined,
   );
   const preJoinDefaults = React.useMemo(() => {
     return {
-      username: '',
+      username: session?.user?.name ?? session?.user?.email ?? '',
       videoEnabled: true,
       audioEnabled: true,
     };
-  }, []);
+  }, [session]);
   const [connectionDetails, setConnectionDetails] = React.useState<ConnectionDetails | undefined>(
     undefined,
   );
