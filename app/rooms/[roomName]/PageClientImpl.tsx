@@ -109,9 +109,14 @@ export function PageClientImpl(props: {
               onSubmit={handlePreJoinSubmit}
               onError={handlePreJoinError}
             />
+            {/*
+              PreJoinカード自体は幅いっぱい(width:100%)だが、内部に1remのpaddingがあり
+              「参加」ボタンはその分だけ左右に内側の余白が入る。キャンセルボタンも
+              同じ見た目の幅になるよう、同じ1rem分を差し引いて中央寄せする
+            */}
             <button
               className="lk-button"
-              style={{ width: '100%' }}
+              style={{ width: 'calc(100% - 2rem)', marginLeft: 'auto', marginRight: 'auto' }}
               onClick={() => router.push('/')}
             >
               キャンセル
