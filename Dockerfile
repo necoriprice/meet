@@ -11,6 +11,12 @@ WORKDIR /app
 RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# NEXT_PUBLIC_*はクライアント側バンドルにビルド時に埋め込まれるため、
+# .env.local(.dockerignoreで除外、秘密情報を含む)には頼らずbuild argで渡す
+ARG NEXT_PUBLIC_COGNITO_DOMAIN
+ARG NEXT_PUBLIC_COGNITO_CLIENT_ID
+ENV NEXT_PUBLIC_COGNITO_DOMAIN=$NEXT_PUBLIC_COGNITO_DOMAIN
+ENV NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID
 RUN pnpm run build
 
 FROM base AS runner
