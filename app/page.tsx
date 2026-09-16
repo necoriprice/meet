@@ -21,12 +21,17 @@ function extractRoomId(input: string): string {
   return trimmed;
 }
 
-const JOIN_HISTORY_KEY = 'riprice-meet-join-history';
 const JOIN_HISTORY_MAX = 10;
 
-function loadJoinHistory(): string[] {
+// アカウント(メールアドレス)ごとに履歴を分ける。同じPC・ブラウザを複数アカウントで
+// 使い回すケース(拠点共有PC等)があるため、ブラウザ単位ではなくアカウント単位にする
+function joinHistoryKey(email: string): string {
+  return `riprice-meet-join-history:${email}`;
+}
+
+function loadJoinHistory(email: string): string[] {
   try {
-    const raw = window.localStorage.getItem(JOIN_HISTORY_KEY);
+    const raw = window.localStorage.getItem(joinHistoryKey(email));
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -34,10 +39,10 @@ function loadJoinHistory(): string[] {
   }
 }
 
-function saveJoinHistory(roomId: string, previous: string[]): string[] {
+function saveJoinHistory(email: string, roomId: string, previous: string[]): string[] {
   const next = [roomId, ...previous.filter((id) => id !== roomId)].slice(0, JOIN_HISTORY_MAX);
   try {
-    window.localStorage.setItem(JOIN_HISTORY_KEY, JSON.stringify(next));
+    window.localStorage.setItem(joinHistoryKey(email), JSON.stringify(next));
   } catch {
     // ブラウザ側の制限等で保存に失敗しても致命的ではないため無視する
   }
@@ -53,14 +58,16 @@ export default function Page() {
   const [joinHistory, setJoinHistory] = useState<string[]>([]);
 
   useEffect(() => {
-    setJoinHistory(loadJoinHistory());
-  }, []);
+    if (email) {
+      setJoinHistory(loadJoinHistory(email));
+    }
+  }, [email]);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     const roomId = extractRoomId(joinInput);
-    if (!roomId) return;
-    saveJoinHistory(roomId, joinHistory);
+    if (!roomId || !email) return;
+    saveJoinHistory(email, roomId, joinHistory);
     router.push(`/rooms/${encodeURIComponent(roomId)}`);
   };
 
