@@ -1,3 +1,11 @@
+.appTitle {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #009fe8;
+}
+
 .main {
   position: relative;
   display: grid;

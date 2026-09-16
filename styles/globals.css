@@ -2,6 +2,14 @@
   box-sizing: border-box;
 }
 
+[data-lk-theme='default'] {
+  --lk-accent-fg: #fff;
+  --lk-accent-bg: #009fe8;
+  --lk-accent2: #1caeef;
+  --lk-accent3: #3cbdf3;
+  --lk-accent4: #66ccf6;
+}
+
 html {
   color-scheme: dark;
   background-color: #111;
@@ -52,14 +60,14 @@ footer {
 
 footer a,
 h2 a {
-  color: #ff6352;
-  text-decoration-color: #a33529;
+  color: #009fe8;
+  text-decoration-color: #003e86;
   text-underline-offset: 0.125em;
 }
 
 footer a:hover,
 h2 a {
-  text-decoration-color: #ff6352;
+  text-decoration-color: #009fe8;
 }
 
 h2 a {
