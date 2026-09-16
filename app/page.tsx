@@ -1,16 +1,39 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
 import styles from '../styles/Home.module.css';
 
+// 「ルーム名/room-idを含むURL」「ルーム名/room-idのみ」のどちらで入力されても
+// 対応できるように、URLならpathからルームIDを取り出す
+function extractRoomId(input: string): string {
+  const trimmed = input.trim();
+  try {
+    const url = new URL(trimmed);
+    const match = url.pathname.match(/\/rooms\/([^/]+)/);
+    if (match) return decodeURIComponent(match[1]);
+  } catch {
+    // URLでなければそのまま使う
+  }
+  return trimmed;
+}
+
 export default function Page() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const email = session?.user?.email?.toLowerCase();
   const fixedRoomId = email ? FIXED_ROOM_BY_EMAIL[email]?.roomId : undefined;
+  const [joinInput, setJoinInput] = useState('');
+
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const roomId = extractRoomId(joinInput);
+    if (!roomId) return;
+    router.push(`/rooms/${encodeURIComponent(roomId)}`);
+  };
 
   return (
     <>
@@ -45,6 +68,23 @@ export default function Page() {
             >
               新規ミーティング
             </button>
+          </div>
+        )}
+        {status !== 'loading' && (
+          <div className={styles.tabContent}>
+            <p className={styles.joinLabel}>ミーティングIDまたはURLで参加</p>
+            <form className={styles.joinForm} onSubmit={handleJoin}>
+              <input
+                className={styles.joinInput}
+                type="text"
+                placeholder="例: honsha-room-1"
+                value={joinInput}
+                onChange={(e) => setJoinInput(e.target.value)}
+              />
+              <button className="lk-button" type="submit" disabled={!joinInput.trim()}>
+                参加
+              </button>
+            </form>
           </div>
         )}
         {session?.user?.email && (

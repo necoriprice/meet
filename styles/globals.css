@@ -97,3 +97,31 @@ footer a:hover {
 .lk-control-bar .lk-disconnect-button::before {
   content: '終了';
 }
+
+/* 画面共有ボタンは目立つように緑色にする */
+[data-lk-source='screen_share'] {
+  background-color: #16a34a !important;
+}
+
+[data-lk-source='screen_share']:not(:disabled):hover {
+  background-color: #15803d !important;
+}
+
+[data-lk-source='screen_share'][data-lk-enabled='true'] {
+  background-color: #22c55e !important;
+}
+
+/*
+ * マイク・カメラをオフにした状態が分かりにくい(見た目がほぼ変わらない)との
+ * 指摘のため、オフ時は赤系の背景色にしてひと目で分かるようにする。
+ * PreJoin画面・通話中コントロールバーの両方に適用される。
+ */
+[data-lk-source='microphone'][data-lk-enabled='false'],
+[data-lk-source='camera'][data-lk-enabled='false'] {
+  background-color: #d64958 !important;
+}
+
+[data-lk-source='microphone'][data-lk-enabled='false']:hover,
+[data-lk-source='camera'][data-lk-enabled='false']:hover {
+  background-color: #c53a49 !important;
+}
