@@ -28,27 +28,6 @@ body {
   flex-direction: column;
 }
 
-.header {
-  max-width: 500px;
-  padding-inline: 2rem;
-}
-
-.header > img {
-  display: block;
-  margin: auto;
-  max-width: 100%;
-}
-
-.header > h2 {
-  font-family: 'TWK Everett', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 1.25rem;
-  line-height: 144%;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-}
-
 footer {
   width: 100%;
   padding: 1.5rem 2rem;
@@ -58,18 +37,12 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-footer a,
-h2 a {
+footer a {
   color: #009fe8;
   text-decoration-color: #003e86;
   text-underline-offset: 0.125em;
 }
 
-footer a:hover,
-h2 a {
+footer a:hover {
   text-decoration-color: #009fe8;
-}
-
-h2 a {
-  text-decoration: none;
 }

@@ -14,13 +14,13 @@ export const metadata: Metadata = {
   icons: {
     icon: {
       rel: 'icon',
-      url: '/images/riprice/riprice-logo.png',
+      url: '/images/riprice/riprice-meet-logo-256.png',
     },
     apple: [
       {
         rel: 'apple-touch-icon',
-        url: '/images/riprice/riprice-logo.png',
-        sizes: '80x90',
+        url: '/images/riprice/riprice-meet-logo-256.png',
+        sizes: '256x256',
       },
     ],
   },
