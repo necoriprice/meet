@@ -10,6 +10,17 @@
   color: #009fe8;
 }
 
+.backLink {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #009fe8;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

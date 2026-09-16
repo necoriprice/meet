@@ -36,7 +36,8 @@ function LoginForm() {
       setError('メールアドレスまたはパスワードが正しくありません。');
       return;
     }
-    router.push(callbackUrl);
+    // pushだとブラウザの「戻る」でログイン画面に戻ってしまうためreplaceする
+    router.replace(callbackUrl);
   };
 
   return (

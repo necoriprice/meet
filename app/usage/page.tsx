@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import styles from '../../styles/Usage.module.css';
 
@@ -37,6 +38,9 @@ export default function UsagePage() {
 
   return (
     <main className={styles.main} data-lk-theme="default">
+      <Link href="/" className={styles.backLink}>
+        ← ホームに戻る
+      </Link>
       <h1 className={styles.title}>利用状況</h1>
       {error && <p>取得に失敗しました: {error}</p>}
       {!summary && !error && <p>読み込み中...</p>}
