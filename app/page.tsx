@@ -6,7 +6,7 @@ import styles from '../styles/Home.module.css';
 
 // 3拠点の定例会議用に固定のルーム名を使う運用(design docの方針)。変更する場合は
 // NEXT_PUBLIC_FIXED_ROOM_ID を設定する。
-const FIXED_ROOM_ID = process.env.NEXT_PUBLIC_FIXED_ROOM_ID ?? 'honsha-kaigishitsu';
+const FIXED_ROOM_ID = process.env.NEXT_PUBLIC_FIXED_ROOM_ID ?? 'honsha-room-1';
 
 export default function Page() {
   const router = useRouter();
