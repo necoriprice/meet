@@ -2,15 +2,17 @@
 
 import React from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
+import { CustomPreJoin } from '@/lib/CustomPreJoin';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
+import { RoomPasswordGate } from '@/lib/RoomPasswordGate';
 import { SettingsMenu } from '@/lib/SettingsMenu';
+import { loadAudioOutputDeviceId } from '@/lib/audioOutput';
 import { ConnectionDetails } from '@/lib/types';
 import {
   formatChatMessageLinks,
   LocalUserChoices,
-  PreJoin,
   RoomContext,
   VideoConference,
 } from '@livekit/components-react';
@@ -45,6 +47,12 @@ export function PageClientImpl(props: {
 }) {
   const router = useRouter();
   const { data: session } = useSession();
+  const [roomPassword, setRoomPassword] = React.useState<string | undefined>(undefined);
+  const [passwordVerified, setPasswordVerified] = React.useState(false);
+  const handlePasswordVerified = React.useCallback((password: string | undefined) => {
+    setRoomPassword(password);
+    setPasswordVerified(true);
+  }, []);
   const [preJoinChoices, setPreJoinChoices] = React.useState<LocalUserChoices | undefined>(
     undefined,
   );
@@ -63,23 +71,53 @@ export function PageClientImpl(props: {
     undefined,
   );
 
-  const handlePreJoinSubmit = React.useCallback(async (values: LocalUserChoices) => {
-    setPreJoinChoices(values);
-    const url = new URL(CONN_DETAILS_ENDPOINT, window.location.origin);
-    url.searchParams.append('roomName', props.roomName);
-    url.searchParams.append('participantName', values.username);
-    if (props.region) {
-      url.searchParams.append('region', props.region);
-    }
-    const connectionDetailsResp = await fetch(url.toString());
-    const connectionDetailsData = await connectionDetailsResp.json();
-    setConnectionDetails(connectionDetailsData);
-  }, []);
+  const handlePreJoinSubmit = React.useCallback(
+    async (values: LocalUserChoices) => {
+      const url = new URL(CONN_DETAILS_ENDPOINT, window.location.origin);
+      url.searchParams.append('roomName', props.roomName);
+      url.searchParams.append('participantName', values.username);
+      if (props.region) {
+        url.searchParams.append('region', props.region);
+      }
+      if (roomPassword) {
+        url.searchParams.append('password', roomPassword);
+      }
+      const connectionDetailsResp = await fetch(url.toString());
+      if (!connectionDetailsResp.ok) {
+        // パスワード変更などでverify時点と食い違った場合はここで検出される。
+        // 最初のパスワード入力からやり直させる
+        console.error(
+          'connection-detailsの取得に失敗しました',
+          connectionDetailsResp.status,
+          await connectionDetailsResp.text().catch(() => ''),
+        );
+        alert('入室に失敗しました。パスワードが変更された可能性があります。もう一度お試しください。');
+        setPasswordVerified(false);
+        setRoomPassword(undefined);
+        return;
+      }
+      const connectionDetailsData = await connectionDetailsResp.json();
+      setPreJoinChoices(values);
+      setConnectionDetails(connectionDetailsData);
+    },
+    [props.roomName, props.region, roomPassword],
+  );
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
   return (
     <main data-lk-theme="default" style={{ height: '100%' }}>
-      {connectionDetails === undefined || preJoinChoices === undefined ? (
+      {!passwordVerified ? (
+        <div
+          style={{
+            display: 'flex',
+            height: '100%',
+            overflowY: 'auto',
+            padding: '1.5rem 1rem',
+          }}
+        >
+          <RoomPasswordGate roomName={props.roomName} onVerified={handlePasswordVerified} />
+        </div>
+      ) : connectionDetails === undefined || preJoinChoices === undefined ? (
         <div
           style={{
             display: 'flex',
@@ -104,7 +142,7 @@ export function PageClientImpl(props: {
               gap: '0.75rem',
             }}
           >
-            <PreJoin
+            <CustomPreJoin
               defaults={preJoinDefaults}
               onSubmit={handlePreJoinSubmit}
               onError={handlePreJoinError}
@@ -152,6 +190,8 @@ function VideoConferenceComponent(props: {
   const e2eeEnabled = !!(e2eePassphrase && worker);
 
   const [e2eeSetupComplete, setE2eeSetupComplete] = React.useState(false);
+  // PreJoin画面で選択・保存したスピーカーを、入室後もそのまま使う
+  const audioOutputDeviceId = React.useMemo(() => loadAudioOutputDeviceId(), []);
 
   const roomOptions = React.useMemo((): RoomOptions => {
     let videoCodec: VideoCodec | undefined = props.options.codec ? props.options.codec : 'vp9';
@@ -176,12 +216,13 @@ function VideoConferenceComponent(props: {
       audioCaptureDefaults: {
         deviceId: props.userChoices.audioDeviceId ?? undefined,
       },
+      audioOutput: audioOutputDeviceId ? { deviceId: audioOutputDeviceId } : undefined,
       adaptiveStream: true,
       dynacast: true,
       e2ee: keyProvider && worker && e2eeEnabled ? { keyProvider, worker } : undefined,
       singlePeerConnection: props.options.singlePeerConnection,
     };
-  }, [props.userChoices, props.options.hq, props.options.codec]);
+  }, [props.userChoices, props.options.hq, props.options.codec, audioOutputDeviceId]);
 
   const room = React.useMemo(() => new Room(roomOptions), []);
 

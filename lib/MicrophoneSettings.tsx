@@ -1,9 +1,10 @@
 import React from 'react';
 import { useKrispNoiseFilter } from '@livekit/components-react/krisp';
-import { TrackToggle } from '@livekit/components-react';
+import { TrackToggle, useLocalParticipant } from '@livekit/components-react';
 import { MediaDeviceMenu } from '@livekit/components-react';
-import { Track } from 'livekit-client';
+import { LocalTrackPublication, Track } from 'livekit-client';
 import { isLowPowerDevice } from './client-utils';
+import { MicLevelMeter } from './MicLevelMeter';
 
 export function MicrophoneSettings() {
   const { isNoiseFilterEnabled, setNoiseFilterEnabled, isNoiseFilterPending } = useKrispNoiseFilter(
@@ -21,35 +22,47 @@ export function MicrophoneSettings() {
     },
   );
 
+  const { microphoneTrack } = useLocalParticipant();
+  const mediaStreamTrack = (microphoneTrack as LocalTrackPublication)?.track?.mediaStreamTrack;
+
   React.useEffect(() => {
     // enable Krisp by default on non-low power devices
     setNoiseFilterEnabled(!isLowPowerDevice());
   }, []);
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '10px',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      <section className="lk-button-group">
-        <TrackToggle source={Track.Source.Microphone}>Microphone</TrackToggle>
-        <div className="lk-button-group-menu">
-          <MediaDeviceMenu kind="audioinput" />
-        </div>
-      </section>
-
-      <button
-        className="lk-button"
-        onClick={() => setNoiseFilterEnabled(!isNoiseFilterEnabled)}
-        disabled={isNoiseFilterPending}
-        aria-pressed={isNoiseFilterEnabled}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '10px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
       >
-        {isNoiseFilterEnabled ? 'Disable' : 'Enable'} Enhanced Noise Cancellation
-      </button>
+        <section className="lk-button-group">
+          <TrackToggle source={Track.Source.Microphone}>Microphone</TrackToggle>
+          <div className="lk-button-group-menu">
+            <MediaDeviceMenu kind="audioinput" />
+          </div>
+        </section>
+
+        <button
+          className="lk-button"
+          onClick={() => setNoiseFilterEnabled(!isNoiseFilterEnabled)}
+          disabled={isNoiseFilterPending}
+          aria-pressed={isNoiseFilterEnabled}
+        >
+          {isNoiseFilterEnabled ? 'Disable' : 'Enable'} Enhanced Noise Cancellation
+        </button>
+      </div>
+
+      <div>
+        <MicLevelMeter mediaStreamTrack={mediaStreamTrack} />
+        <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '4px' }}>
+          マイクに向かって話すとバーが動きます
+        </div>
+      </div>
     </div>
   );
 }

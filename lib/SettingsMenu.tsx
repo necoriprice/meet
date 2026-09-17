@@ -11,6 +11,7 @@ import {
 import styles from '../styles/SettingsMenu.module.css';
 import { CameraSettings } from './CameraSettings';
 import { MicrophoneSettings } from './MicrophoneSettings';
+import { playTestTone } from './audioOutput';
 /**
  * @alpha
  */
@@ -40,6 +41,22 @@ export function SettingsMenu(props: SettingsMenuProps) {
   const isRecording = useIsRecording();
   const [initialRecStatus, setInitialRecStatus] = React.useState(isRecording);
   const [processingRecRequest, setProcessingRecRequest] = React.useState(false);
+  const [isTestingSpeaker, setIsTestingSpeaker] = React.useState(false);
+
+  const handleTestSpeaker = async () => {
+    if (isTestingSpeaker) {
+      return;
+    }
+    setIsTestingSpeaker(true);
+    try {
+      const activeDeviceId = room.getActiveDevice('audiooutput');
+      await playTestTone(activeDeviceId);
+    } catch (e) {
+      console.error('スピーカーのテスト再生に失敗しました', e);
+    } finally {
+      setIsTestingSpeaker(false);
+    }
+  };
 
   React.useEffect(() => {
     if (initialRecStatus !== isRecording) {
@@ -120,6 +137,15 @@ export function SettingsMenu(props: SettingsMenuProps) {
                   <div className="lk-button-group-menu">
                     <MediaDeviceMenu kind="audiooutput"></MediaDeviceMenu>
                   </div>
+                </section>
+                <section style={{ marginTop: '8px' }}>
+                  <button
+                    className="lk-button"
+                    onClick={handleTestSpeaker}
+                    disabled={isTestingSpeaker}
+                  >
+                    {isTestingSpeaker ? '再生中...' : 'スピーカーをテスト再生'}
+                  </button>
                 </section>
               </>
             )}

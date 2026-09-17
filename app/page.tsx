@@ -31,6 +31,15 @@ export default function Page() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [checkingRoom, setCheckingRoom] = useState(false);
 
+  const [newRoomPassword, setNewRoomPassword] = useState('');
+  const [creatingRoom, setCreatingRoom] = useState(false);
+
+  const [fixedRoomHasPassword, setFixedRoomHasPassword] = useState(false);
+  const [fixedRoomPasswordEditing, setFixedRoomPasswordEditing] = useState(false);
+  const [fixedRoomPasswordInput, setFixedRoomPasswordInput] = useState('');
+  const [fixedRoomPasswordSaving, setFixedRoomPasswordSaving] = useState(false);
+  const [fixedRoomPasswordMessage, setFixedRoomPasswordMessage] = useState<string | null>(null);
+
   useEffect(() => {
     if (!email) return;
     fetch('/api/join-history')
@@ -38,6 +47,64 @@ export default function Page() {
       .then((data) => setJoinHistory(data.history ?? []))
       .catch(() => {});
   }, [email]);
+
+  useEffect(() => {
+    if (!fixedRoomId) return;
+    fetch(`/api/room-password?roomName=${encodeURIComponent(fixedRoomId)}`)
+      .then((res) => (res.ok ? res.json() : { hasPassword: false }))
+      .then((data) => setFixedRoomHasPassword(!!data.hasPassword))
+      .catch(() => {});
+  }, [fixedRoomId]);
+
+  const handleStartNewRoom = async () => {
+    setCreatingRoom(true);
+    try {
+      const roomId = generateRoomId();
+      const password = newRoomPassword.trim();
+      if (password) {
+        await fetch('/api/room-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomName: roomId,
+            password,
+            ttlSeconds: 60 * 60 * 24,
+          }),
+        }).catch(() => {
+          // 設定に失敗してもルーム作成自体は継続する(パスワードなしになるだけ)
+        });
+      }
+      router.push(`/rooms/${roomId}`);
+    } finally {
+      setCreatingRoom(false);
+    }
+  };
+
+  const handleSaveFixedRoomPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fixedRoomId) return;
+    setFixedRoomPasswordSaving(true);
+    setFixedRoomPasswordMessage(null);
+    try {
+      const password = fixedRoomPasswordInput.trim();
+      const res = await fetch('/api/room-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomName: fixedRoomId, password }),
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      setFixedRoomHasPassword(!!password);
+      setFixedRoomPasswordMessage(password ? 'パスワードを設定しました' : 'パスワードを解除しました');
+      setFixedRoomPasswordInput('');
+      setFixedRoomPasswordEditing(false);
+    } catch {
+      setFixedRoomPasswordMessage('保存に失敗しました。もう一度お試しください。');
+    } finally {
+      setFixedRoomPasswordSaving(false);
+    }
+  };
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,21 +154,68 @@ export default function Page() {
         {status !== 'loading' && (
           <div className={styles.tabContent}>
             {fixedRoomId && (
-              <button
-                className="lk-button"
-                style={{ paddingBlock: '0.75rem' }}
-                onClick={() => router.push(`/rooms/${fixedRoomId}`)}
-              >
-                ミーティングの開始
-              </button>
+              <>
+                <button
+                  className="lk-button"
+                  style={{ paddingBlock: '0.75rem' }}
+                  onClick={() => router.push(`/rooms/${fixedRoomId}`)}
+                >
+                  ミーティングの開始
+                </button>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <span className={styles.joinLabel}>
+                    {fixedRoomHasPassword ? '🔒 パスワード設定済み' : 'パスワード未設定'}
+                  </span>
+                  <button
+                    type="button"
+                    className="lk-button"
+                    style={{ fontSize: '0.8rem', paddingInline: '0.6rem' }}
+                    onClick={() => setFixedRoomPasswordEditing((v) => !v)}
+                  >
+                    {fixedRoomPasswordEditing ? '閉じる' : 'パスワードを設定'}
+                  </button>
+                </div>
+                {fixedRoomPasswordEditing && (
+                  <form className={styles.joinForm} onSubmit={handleSaveFixedRoomPassword}>
+                    <input
+                      className={styles.joinInput}
+                      type="password"
+                      placeholder="新しいパスワード(空欄で解除)"
+                      value={fixedRoomPasswordInput}
+                      onChange={(e) => setFixedRoomPasswordInput(e.target.value)}
+                    />
+                    <button className="lk-button" type="submit" disabled={fixedRoomPasswordSaving}>
+                      {fixedRoomPasswordSaving ? '保存中...' : '保存'}
+                    </button>
+                  </form>
+                )}
+                {fixedRoomPasswordMessage && (
+                  <p className={styles.joinLabel}>{fixedRoomPasswordMessage}</p>
+                )}
+              </>
             )}
             <button
               className="lk-button"
               style={{ paddingBlock: '0.75rem' }}
-              onClick={() => router.push(`/rooms/${generateRoomId()}`)}
+              onClick={handleStartNewRoom}
+              disabled={creatingRoom}
             >
-              新規ミーティング
+              {creatingRoom ? '作成中...' : '新規ミーティング'}
             </button>
+            <input
+              className={styles.joinInput}
+              type="password"
+              placeholder="新規ミーティングのパスワード(任意)"
+              value={newRoomPassword}
+              onChange={(e) => setNewRoomPassword(e.target.value)}
+            />
           </div>
         )}
         {status !== 'loading' && (

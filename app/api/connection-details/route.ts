@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { getLiveKitURL } from '@/lib/getLiveKitURL';
+import { verifyRoomPassword } from '@/lib/roomPassword';
 import { ConnectionDetails } from '@/lib/types';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
@@ -35,6 +36,13 @@ export async function GET(request: NextRequest) {
 
     if (typeof roomName !== 'string') {
       return new NextResponse('Missing required query parameter: roomName', { status: 400 });
+    }
+
+    // ルームにパスワードが設定されている場合、URLを知っているだけでは入室できないようにする
+    // (フロント側の入力画面はUXのためのもので、実際のアクセス制御はここで行う)
+    const password = request.nextUrl.searchParams.get('password') ?? '';
+    if (!(await verifyRoomPassword(roomName, password))) {
+      return new NextResponse('Incorrect room password', { status: 403 });
     }
 
     // Generate participant token
