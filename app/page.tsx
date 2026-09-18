@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { AccountMenu } from '@/lib/AccountMenu';
-import { isUsageAdmin } from '@/lib/adminAccess';
+import { AppHeader } from '@/lib/AppHeader';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
 import styles from '../styles/Home.module.css';
@@ -141,25 +140,7 @@ export default function Page() {
 
   return (
     <>
-      <header className={styles.topBar} data-lk-theme="default">
-        <div className={styles.topBarBrand}>
-          <img
-            src="/images/riprice/riprice-meet-logo-256.png"
-            alt="RIPRICE Meet"
-            width="32"
-            height="32"
-          />
-          <span className={styles.topBarTitle}>RIPRICE Meet</span>
-        </div>
-        {session?.user?.email && (
-          <AccountMenu
-            name={session.user.name}
-            email={session.user.email}
-            image={session.user.image}
-            isAdmin={isUsageAdmin(session.user.email)}
-          />
-        )}
-      </header>
+      <AppHeader />
       <main className={styles.main} data-lk-theme="default">
         <p className={styles.tagline}>社内向けビデオ会議システム</p>
         {status !== 'loading' && (

@@ -294,3 +294,75 @@
   color: #ff8a8a;
 }
 
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(4, 8, 18, 0.65);
+}
+
+.dialogCard {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  background: #131c30;
+  border: 1px solid rgba(148, 178, 216, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 24px 48px -20px rgba(0, 10, 30, 0.85);
+}
+
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dialogTitle {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.dialogClose {
+  border: none;
+  background: none;
+  color: #7d93b8;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.dialogClose:hover {
+  color: #d6ecfb;
+}
+
+.dialogSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dialogSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #d6ecfb;
+}
+
+.dialogHint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #7d93b8;
+}
+

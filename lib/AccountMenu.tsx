@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { signOut } from 'next-auth/react';
 import { AccountAvatar } from './AccountAvatar';
+import { DeviceTestDialog } from './DeviceTestDialog';
 import styles from '../styles/Home.module.css';
 
 export interface AccountMenuProps {
@@ -17,6 +18,7 @@ export interface AccountMenuProps {
  */
 export function AccountMenu({ name, email, image, isAdmin }: AccountMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isDeviceTestOpen, setIsDeviceTestOpen] = React.useState(false);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -51,6 +53,18 @@ export function AccountMenu({ name, email, image, isAdmin }: AccountMenuProps) {
             </li>
           )}
           <li>
+            <button
+              type="button"
+              className={styles.accountMenuItem}
+              onClick={() => {
+                setIsOpen(false);
+                setIsDeviceTestOpen(true);
+              }}
+            >
+              デバイステスト
+            </button>
+          </li>
+          <li>
             <button type="button" className={styles.accountMenuItem} disabled>
               設定
               <span className={styles.accountMenuBadge}>準備中</span>
@@ -67,6 +81,7 @@ export function AccountMenu({ name, email, image, isAdmin }: AccountMenuProps) {
           </li>
         </ul>
       )}
+      {isDeviceTestOpen && <DeviceTestDialog onClose={() => setIsDeviceTestOpen(false)} />}
     </div>
   );
 }

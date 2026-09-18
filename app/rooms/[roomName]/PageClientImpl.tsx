@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AppHeader } from '@/lib/AppHeader';
 import { decodePassphrase } from '@/lib/client-utils';
 import { CustomPreJoin } from '@/lib/CustomPreJoin';
 import { CustomVideoConference } from '@/lib/CustomVideoConference';
@@ -104,8 +105,12 @@ export function PageClientImpl(props: {
   );
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
+  const showPreJoinHeader = !passwordVerified || connectionDetails === undefined || preJoinChoices === undefined;
+
   return (
-    <main data-lk-theme="default" style={{ height: '100%' }}>
+    <>
+      {showPreJoinHeader && <AppHeader />}
+      <main data-lk-theme="default" style={{ flex: '1 1 auto', minHeight: 0 }}>
       {!passwordVerified ? (
         <div
           style={{
@@ -172,7 +177,8 @@ export function PageClientImpl(props: {
           }}
         />
       )}
-    </main>
+      </main>
+    </>
   );
 }
 

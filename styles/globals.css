@@ -29,7 +29,8 @@ body {
  * 場合は名前の頭文字アバター)を表示する。サイズはタイル本体の大きさに応じて
  * 相対的に決まる(標準のプレースホルダーSVGがheight:100%だったのに合わせている)。
  */
-.lk-participant-placeholder .lk-account-avatar {
+.lk-participant-placeholder .lk-account-avatar,
+.lk-camera-off-note .lk-account-avatar {
   width: 35%;
   max-width: 160px;
   aspect-ratio: 1 / 1;
@@ -37,7 +38,8 @@ body {
   object-fit: cover;
 }
 
-.lk-participant-placeholder .lk-account-avatar-fallback {
+.lk-participant-placeholder .lk-account-avatar-fallback,
+.lk-camera-off-note .lk-account-avatar-fallback {
   display: flex;
   align-items: center;
   justify-content: center;

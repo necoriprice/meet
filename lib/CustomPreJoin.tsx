@@ -2,16 +2,10 @@
 import * as React from 'react';
 import type { LocalAudioTrack, LocalVideoTrack } from 'livekit-client';
 import { facingModeFromLocalTrack, Track } from 'livekit-client';
-import {
-  MediaDeviceMenu,
-  ParticipantPlaceholder,
-  TrackToggle,
-  usePersistentUserChoices,
-  usePreviewTracks,
-} from '@livekit/components-react';
+import { MediaDeviceMenu, TrackToggle, usePersistentUserChoices, usePreviewTracks } from '@livekit/components-react';
 import type { LocalUserChoices } from '@livekit/components-react';
-import { MicLevelMeter } from './MicLevelMeter';
-import { loadAudioOutputDeviceId, playTestTone, saveAudioOutputDeviceId } from './audioOutput';
+import { useSession } from 'next-auth/react';
+import { CameraOffAvatar } from './CameraOffAvatar';
 
 export interface CustomPreJoinProps {
   defaults?: Partial<LocalUserChoices>;
@@ -20,11 +14,12 @@ export interface CustomPreJoinProps {
 }
 
 /**
- * ライブラリ標準のPreJoinに、参加前のマイク音量メーター・スピーカーの選択とテスト再生を
- * 追加したもの。標準のPreJoinはスピーカーの選択・テスト機能を持たないため、
- * `usePreviewTracks`等の公開APIを使って同等のUIを再実装している。
+ * ライブラリ標準のPreJoinに、カメラオフ時のプレースホルダーをアカウントアバターに
+ * 差し替えたもの(標準は差し替え手段が無いため`usePreviewTracks`等の公開APIで再実装)。
+ * マイク・スピーカーのテストはアカウントメニューの「デバイステスト」に移設した。
  */
 export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoinProps) {
+  const { data: session } = useSession();
   const {
     userChoices: initialUserChoices,
     saveAudioInputDeviceId,
@@ -39,10 +34,6 @@ export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoi
   const [videoEnabled, setVideoEnabled] = React.useState(initialUserChoices.videoEnabled);
   const [audioDeviceId, setAudioDeviceId] = React.useState(initialUserChoices.audioDeviceId);
   const [videoDeviceId, setVideoDeviceId] = React.useState(initialUserChoices.videoDeviceId);
-  const [audioOutputDeviceId, setAudioOutputDeviceId] = React.useState<string | undefined>(() =>
-    loadAudioOutputDeviceId(),
-  );
-  const [isTestingSpeaker, setIsTestingSpeaker] = React.useState(false);
 
   React.useEffect(() => {
     saveAudioInputEnabled(audioEnabled);
@@ -95,25 +86,6 @@ export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoi
     };
   }, [videoTrack]);
 
-  const handleSpeakerDeviceChange = (deviceId: string) => {
-    setAudioOutputDeviceId(deviceId);
-    saveAudioOutputDeviceId(deviceId);
-  };
-
-  const handleTestSpeaker = async () => {
-    if (isTestingSpeaker) {
-      return;
-    }
-    setIsTestingSpeaker(true);
-    try {
-      await playTestTone(audioOutputDeviceId);
-    } catch (e) {
-      console.error('スピーカーのテスト再生に失敗しました', e);
-    } finally {
-      setIsTestingSpeaker(false);
-    }
-  };
-
   const userChoices: LocalUserChoices = {
     username,
     videoEnabled,
@@ -138,7 +110,11 @@ export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoi
         )}
         {(!videoTrack || !videoEnabled) && (
           <div className="lk-camera-off-note">
-            <ParticipantPlaceholder />
+            <CameraOffAvatar
+              name={session?.user?.name}
+              email={session?.user?.email}
+              image={session?.user?.image}
+            />
           </div>
         )}
       </div>
@@ -180,43 +156,6 @@ export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoi
             />
           </div>
         </div>
-      </div>
-
-      {audioEnabled && (
-        <div style={{ padding: '0 0.25rem' }}>
-          <MicLevelMeter mediaStreamTrack={audioTrack?.mediaStreamTrack} />
-          <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '4px' }}>
-            マイクに向かって話すとバーが動きます
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.5rem',
-          }}
-        >
-          <span style={{ fontSize: '0.85rem' }}>スピーカー</span>
-          <div className="lk-button-group-menu" style={{ position: 'relative' }}>
-            <MediaDeviceMenu
-              kind="audiooutput"
-              initialSelection={audioOutputDeviceId}
-              onActiveDeviceChange={(_, id) => handleSpeakerDeviceChange(id)}
-            />
-          </div>
-        </div>
-        <button
-          type="button"
-          className="lk-button"
-          onClick={handleTestSpeaker}
-          disabled={isTestingSpeaker}
-        >
-          {isTestingSpeaker ? '再生中...' : 'スピーカーをテスト再生'}
-        </button>
       </div>
 
       <form className="lk-username-container">
