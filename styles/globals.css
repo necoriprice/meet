@@ -57,6 +57,27 @@ body {
   font-size: min(4vw, 2.5rem);
 }
 
+/* デバイステストダイアログの区切りバー式レベルメーター(Windowsのサウンド設定を参考) */
+.lk-level-meter {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lk-level-meter-segment {
+  flex: 1;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--lk-bg4);
+  transition: background-color 80ms linear;
+}
+
+.lk-level-meter-segment-active {
+  background: var(--lk-accent-bg);
+}
+
 /*
  * タイル右上の「ピン留め」矢印アイコン(FocusToggle)は、コントロールバーの
  * 「レイアウト」ドロップダウンに置き換えたため非表示にする。
