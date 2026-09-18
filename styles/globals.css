@@ -33,9 +33,13 @@ body {
 .lk-camera-off-note .lk-account-avatar {
   width: 35%;
   max-width: 160px;
-  /* ライブラリ側の`.lk-camera-off-note>*{height:70%}`が優先されて楕円になる
-     (aspect-ratioはheightがautoでないと効かない)のを防ぐため明示的にautoにする */
-  height: auto;
+  /*
+   * PreJoin側のライブラリCSSは`.lk-prejoin .lk-video-container .lk-camera-off-note>*{height:70%}`
+   * という3クラス分の詳細度(0,3,0)でheightを強制してくる。このルールは2クラス(0,2,0)しかなく
+   * 詳細度で負けてaspect-ratio(heightがautoでないと効かない)が無視され楕円になっていたため、
+   * !importantで明示的に上書きする。
+   */
+  height: auto !important;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
