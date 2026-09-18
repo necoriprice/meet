@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import { AccountAvatar } from '@/lib/AccountAvatar';
 import { isUsageAdmin } from '@/lib/adminAccess';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
@@ -140,21 +141,32 @@ export default function Page() {
 
   return (
     <>
-      <main className={styles.main} data-lk-theme="default">
-        <div className={styles.header}>
-          <div className={styles.headerRow}>
-            <span className={styles.logoWrap}>
-              <img
-                src="/images/riprice/riprice-meet-logo-256.png"
-                alt="RIPRICE Meet"
-                width="56"
-                height="56"
-              />
-            </span>
-            <h1 className={styles.appTitle}>RIPRICE Meet</h1>
-          </div>
-          <p className={styles.tagline}>社内向けビデオ会議システム</p>
+      <header className={styles.topBar} data-lk-theme="default">
+        <div className={styles.topBarBrand}>
+          <img
+            src="/images/riprice/riprice-meet-logo-256.png"
+            alt="RIPRICE Meet"
+            width="32"
+            height="32"
+          />
+          <span className={styles.topBarTitle}>RIPRICE Meet</span>
         </div>
+        {session?.user?.email && (
+          <div className={styles.topBarAccount}>
+            {isUsageAdmin(session.user.email) && <a href="/usage">利用状況</a>}
+            <AccountAvatar
+              name={session.user.name}
+              email={session.user.email}
+              image={session.user.image}
+            />
+            <button className={styles.logoutButton} onClick={() => signOut({ callbackUrl: '/' })}>
+              ログアウト
+            </button>
+          </div>
+        )}
+      </header>
+      <main className={styles.main} data-lk-theme="default">
+        <p className={styles.tagline}>社内向けビデオ会議システム</p>
         {status !== 'loading' && (
           <div className={styles.tabContent}>
             {fixedRoomId && (
@@ -248,15 +260,6 @@ export default function Page() {
               </button>
             </form>
             {joinError && <p className={styles.joinError}>{joinError}</p>}
-          </div>
-        )}
-        {session?.user?.email && (
-          <div className={styles.accountBar}>
-            <span>{session.user.email}</span>
-            {isUsageAdmin(session.user.email) && <a href="/usage">利用状況</a>}
-            <button className={styles.logoutButton} onClick={() => signOut({ callbackUrl: '/' })}>
-              ログアウト
-            </button>
           </div>
         )}
       </main>

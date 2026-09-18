@@ -1,46 +1,75 @@
-.header {
-  width: 100%;
-  max-width: 480px;
-  padding-inline: 2rem;
-  margin-bottom: 1.75rem;
-}
-
-.headerRow {
+.topBar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid rgba(148, 178, 216, 0.14);
 }
 
-.logoWrap {
-  position: relative;
+.topBarBrand {
   display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.topBarBrand img {
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
-.logoWrap::before {
-  content: '';
-  position: absolute;
-  inset: -12px;
-  background: radial-gradient(circle, rgba(0, 159, 232, 0.4), transparent 70%);
-  filter: blur(4px);
-  z-index: -1;
-}
-
-.appTitle {
-  margin: 0;
+.topBarTitle {
   font-family: var(--font-display), sans-serif;
-  font-size: 2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  white-space: nowrap;
   background: linear-gradient(135deg, #5cc9ff 0%, #009fe8 55%, #0064b3 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.topBarAccount {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.85rem;
+  color: #7d93b8;
+  flex-shrink: 0;
+}
+
+.topBarAccount a {
+  color: #7d93b8;
+  white-space: nowrap;
+}
+
+.topBarAccount a:hover {
+  color: #b9cbe6;
+}
+
+.accountAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.accountAvatarFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #00b3ff, #0064b3);
+  color: #fff;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
 .tagline {
-  margin: 0.55rem 0 0;
+  margin: 0 0 0.4rem;
   text-align: center;
   font-size: 0.95rem;
   color: #90a4c4;
@@ -201,22 +230,6 @@
   margin: 0;
   font-size: 0.85rem;
   color: #ff8a8a;
-}
-
-.accountBar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: #7d93b8;
-}
-
-.accountBar a {
-  color: #7d93b8;
-}
-
-.accountBar a:hover {
-  color: #b9cbe6;
 }
 
 .logoutButton {
