@@ -24,10 +24,11 @@ export function DeviceTestDialog({ onClose }: DeviceTestDialogProps) {
   );
   const [isTestingSpeaker, setIsTestingSpeaker] = React.useState(false);
 
-  const tracks = usePreviewTracks(
-    { audio: { deviceId: audioDeviceId }, video: false },
-    (e) => console.error('マイクのプレビュー取得に失敗しました', e),
-  );
+  const handlePreviewError = React.useCallback((e: Error) => {
+    console.error('マイクのプレビュー取得に失敗しました', e);
+  }, []);
+
+  const tracks = usePreviewTracks({ audio: { deviceId: audioDeviceId }, video: false }, handlePreviewError);
   const audioTrack = tracks?.[0] as LocalAudioTrack | undefined;
 
   const handleAudioDeviceChange = (id: string) => {
