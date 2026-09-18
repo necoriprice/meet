@@ -3,6 +3,7 @@
 import React from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
 import { CustomPreJoin } from '@/lib/CustomPreJoin';
+import { CustomVideoConference } from '@/lib/CustomVideoConference';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
@@ -14,7 +15,6 @@ import {
   formatChatMessageLinks,
   LocalUserChoices,
   RoomContext,
-  VideoConference,
 } from '@livekit/components-react';
 import {
   ExternalE2EEKeyProvider,
@@ -312,7 +312,7 @@ function VideoConferenceComponent(props: {
     <div className="lk-room-container">
       <RoomContext.Provider value={room}>
         <KeyboardShortcuts />
-        <VideoConference
+        <CustomVideoConference
           chatMessageFormatter={formatChatMessageLinks}
           SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
         />

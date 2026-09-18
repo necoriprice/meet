@@ -24,8 +24,10 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const roomName = request.nextUrl.searchParams.get('roomName');
     const participantName = request.nextUrl.searchParams.get('participantName') ?? identity;
-    const metadata = request.nextUrl.searchParams.get('metadata') ?? '';
     const region = request.nextUrl.searchParams.get('region');
+    // カメラオフ時にGoogleアカウントのアバターを表示するため、写真URLをmetadataに埋め込む
+    // (honsha1等のCognito共有アカウントはimageを持たないため未設定のままになる)
+    const metadata = JSON.stringify({ avatarUrl: session.user.image ?? undefined });
     if (!LIVEKIT_URL) {
       throw new Error('LIVEKIT_URL is not defined');
     }
