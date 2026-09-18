@@ -18,6 +18,21 @@ export function MicLevelMeter({ mediaStreamTrack }: { mediaStreamTrack?: MediaSt
     source.connect(analyser);
     const data = new Uint8Array(analyser.frequencyBinCount);
 
+    /*
+     * このAudioContextはダイアログを開いた後の非同期処理(getUserMedia解決後)で
+     * 生成されるため、ブラウザのオートプレイ制限によりsuspended状態で作られる。
+     * resume()を呼ばないと音量メーターが常に0のまま動かなかったため、生成直後と
+     * 以降の最初のユーザー操作のタイミングで明示的にresumeする。
+     */
+    const resumeIfSuspended = () => {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
+      }
+    };
+    resumeIfSuspended();
+    window.addEventListener('pointerdown', resumeIfSuspended);
+    window.addEventListener('keydown', resumeIfSuspended);
+
     let rafId: number;
     const tick = () => {
       analyser.getByteTimeDomainData(data);
@@ -33,6 +48,8 @@ export function MicLevelMeter({ mediaStreamTrack }: { mediaStreamTrack?: MediaSt
     rafId = requestAnimationFrame(tick);
 
     return () => {
+      window.removeEventListener('pointerdown', resumeIfSuspended);
+      window.removeEventListener('keydown', resumeIfSuspended);
       cancelAnimationFrame(rafId);
       source.disconnect();
       audioContext.close();
