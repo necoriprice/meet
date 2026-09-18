@@ -31,22 +31,84 @@
   -webkit-text-fill-color: transparent;
 }
 
-.topBarAccount {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  font-size: 0.85rem;
-  color: #7d93b8;
+.accountMenuWrap {
+  position: relative;
   flex-shrink: 0;
 }
 
-.topBarAccount a {
-  color: #7d93b8;
-  white-space: nowrap;
+.avatarButton {
+  display: flex;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
 }
 
-.topBarAccount a:hover {
-  color: #b9cbe6;
+.avatarButton:hover,
+.avatarButton[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px rgba(0, 159, 232, 0.5);
+}
+
+.accountMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: #131c30;
+  border: 1px solid rgba(148, 178, 216, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 16px 36px -12px rgba(0, 10, 30, 0.8);
+}
+
+.accountMenuEmail {
+  padding: 0.5rem 0.65rem 0.6rem;
+  border-bottom: 1px solid rgba(148, 178, 216, 0.16);
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  color: #7d93b8;
+  overflow-wrap: break-word;
+}
+
+.accountMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: none;
+  color: #eaf1fb;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.9rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.accountMenuItem:hover:not(:disabled) {
+  background: rgba(0, 159, 232, 0.12);
+}
+
+.accountMenuItem:disabled {
+  color: #5c6d8a;
+  cursor: default;
+}
+
+.accountMenuBadge {
+  font-size: 0.7rem;
+  color: #5c6d8a;
+  border: 1px solid rgba(148, 178, 216, 0.25);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
 }
 
 .accountAvatar {
@@ -232,19 +294,3 @@
   color: #ff8a8a;
 }
 
-.logoutButton {
-  padding: 0.4rem 0.85rem;
-  border: 1px solid rgba(148, 178, 216, 0.25);
-  border-radius: 0.5rem;
-  background: transparent;
-  color: #90a4c4;
-  font-family: var(--font-body), sans-serif;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.logoutButton:hover {
-  border-color: rgba(148, 178, 216, 0.5);
-  color: #d6ecfb;
-}

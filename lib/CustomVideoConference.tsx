@@ -11,7 +11,6 @@ import type {
 } from '@livekit/components-react';
 import {
   AudioTrack,
-  Chat,
   CarouselLayout,
   ConnectionQualityIndicator,
   ConnectionStateToast,
@@ -31,6 +30,7 @@ import {
   useTracks,
   VideoTrack,
 } from '@livekit/components-react';
+import { CustomChat } from './CustomChat';
 import { CustomControlBar } from './CustomControlBar';
 import { ParticipantAvatar } from './ParticipantAvatar';
 import { LayoutMode, loadLayoutMode, saveLayoutMode } from './layoutMode';
@@ -172,7 +172,7 @@ export function CustomVideoConference({
               onLayoutModeChange={handleLayoutModeChange}
             />
           </div>
-          <Chat
+          <CustomChat
             style={{ display: widgetState.showChat ? 'grid' : 'none' }}
             messageFormatter={chatMessageFormatter}
             messageEncoder={chatMessageEncoder}

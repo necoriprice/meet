@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
-import { AccountAvatar } from '@/lib/AccountAvatar';
+import { useSession } from 'next-auth/react';
+import { AccountMenu } from '@/lib/AccountMenu';
 import { isUsageAdmin } from '@/lib/adminAccess';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
@@ -152,17 +152,12 @@ export default function Page() {
           <span className={styles.topBarTitle}>RIPRICE Meet</span>
         </div>
         {session?.user?.email && (
-          <div className={styles.topBarAccount}>
-            {isUsageAdmin(session.user.email) && <a href="/usage">利用状況</a>}
-            <AccountAvatar
-              name={session.user.name}
-              email={session.user.email}
-              image={session.user.image}
-            />
-            <button className={styles.logoutButton} onClick={() => signOut({ callbackUrl: '/' })}>
-              ログアウト
-            </button>
-          </div>
+          <AccountMenu
+            name={session.user.name}
+            email={session.user.email}
+            image={session.user.image}
+            isAdmin={isUsageAdmin(session.user.email)}
+          />
         )}
       </header>
       <main className={styles.main} data-lk-theme="default">
