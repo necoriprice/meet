@@ -137,25 +137,41 @@ export function DeviceTestDialog({ onClose }: DeviceTestDialogProps) {
     recorder.onstop = async () => {
       window.clearTimeout(autoStopTimeoutRef.current);
       const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      const audioEl: SinkCapableAudioElement = new Audio(url);
 
-      if (audioOutputDeviceId && typeof audioEl.setSinkId === 'function') {
-        try {
-          await audioEl.setSinkId(audioOutputDeviceId);
-        } catch (e) {
-          console.warn('録音音声の再生先切り替えに失敗しました。既定のデバイスで再生します', e);
-        }
-      }
-
+      /*
+       * `new Audio(blobUrl)`でMediaRecorderが吐いたwebmをそのまま再生しようとすると、
+       * ChromeでreadyStateが0のまま進まず無限に固まる既知の癖があるため(録音時間の情報が
+       * ヘッダに無いストリーミング形式のwebmだとdurationの解決に失敗する)、
+       * `playTestTone`と同じ「Web Audioでデコード→MediaStreamDestination経由で再生」方式にする。
+       */
+      const playbackContext = new AudioContext();
       const finish = () => {
-        URL.revokeObjectURL(url);
+        playbackContext.close().catch(() => {});
         setMicTestState('idle');
       };
-      audioEl.onended = finish;
 
-      setMicTestState('playing');
       try {
+        const arrayBuffer = await blob.arrayBuffer();
+        const audioBuffer = await playbackContext.decodeAudioData(arrayBuffer);
+        const source = playbackContext.createBufferSource();
+        source.buffer = audioBuffer;
+        const destination = playbackContext.createMediaStreamDestination();
+        source.connect(destination);
+
+        const audioEl: SinkCapableAudioElement = new Audio();
+        audioEl.srcObject = destination.stream;
+
+        if (audioOutputDeviceId && typeof audioEl.setSinkId === 'function') {
+          try {
+            await audioEl.setSinkId(audioOutputDeviceId);
+          } catch (e) {
+            console.warn('録音音声の再生先切り替えに失敗しました。既定のデバイスで再生します', e);
+          }
+        }
+
+        source.onended = finish;
+        setMicTestState('playing');
+        source.start();
         await audioEl.play();
       } catch (e) {
         console.error('録音した音声の再生に失敗しました', e);
