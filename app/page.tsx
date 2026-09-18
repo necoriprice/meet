@@ -143,12 +143,14 @@ export default function Page() {
       <main className={styles.main} data-lk-theme="default">
         <div className={styles.header}>
           <div className={styles.headerRow}>
-            <img
-              src="/images/riprice/riprice-meet-logo-256.png"
-              alt="RIPRICE Meet"
-              width="56"
-              height="56"
-            />
+            <span className={styles.logoWrap}>
+              <img
+                src="/images/riprice/riprice-meet-logo-256.png"
+                alt="RIPRICE Meet"
+                width="56"
+                height="56"
+              />
+            </span>
             <h1 className={styles.appTitle}>RIPRICE Meet</h1>
           </div>
           <p className={styles.tagline}>社内向けビデオ会議システム</p>
@@ -158,8 +160,7 @@ export default function Page() {
             {fixedRoomId && (
               <div className={styles.actionBlock}>
                 <button
-                  className="lk-button"
-                  style={{ paddingBlock: '0.75rem' }}
+                  className={styles.primaryButton}
                   onClick={() => router.push(`/rooms/${fixedRoomId}`)}
                 >
                   ミーティングの開始
@@ -180,7 +181,11 @@ export default function Page() {
                       value={fixedRoomPasswordInput}
                       onChange={(e) => setFixedRoomPasswordInput(e.target.value)}
                     />
-                    <button className="lk-button" type="submit" disabled={fixedRoomPasswordSaving}>
+                    <button
+                      className={styles.joinButton}
+                      type="submit"
+                      disabled={fixedRoomPasswordSaving}
+                    >
                       {fixedRoomPasswordSaving ? '保存中...' : '保存'}
                     </button>
                   </form>
@@ -192,8 +197,7 @@ export default function Page() {
             )}
             <div className={styles.actionBlock}>
               <button
-                className="lk-button"
-                style={{ paddingBlock: '0.75rem' }}
+                className={styles.secondaryButton}
                 onClick={handleStartNewRoom}
                 disabled={creatingRoom}
               >
@@ -235,7 +239,11 @@ export default function Page() {
                   <option key={roomId} value={roomId} />
                 ))}
               </datalist>
-              <button className="lk-button" type="submit" disabled={!joinInput.trim() || checkingRoom}>
+              <button
+                className={styles.joinButton}
+                type="submit"
+                disabled={!joinInput.trim() || checkingRoom}
+              >
                 {checkingRoom ? '確認中...' : '参加'}
               </button>
             </form>
@@ -246,7 +254,7 @@ export default function Page() {
           <div className={styles.accountBar}>
             <span>{session.user.email}</span>
             {isUsageAdmin(session.user.email) && <a href="/usage">利用状況</a>}
-            <button className="lk-button" onClick={() => signOut({ callbackUrl: '/' })}>
+            <button className={styles.logoutButton} onClick={() => signOut({ callbackUrl: '/' })}>
               ログアウト
             </button>
           </div>

@@ -8,6 +8,19 @@
   --lk-accent2: #1caeef;
   --lk-accent3: #3cbdf3;
   --lk-accent4: #66ccf6;
+  /* 既定の中立グレー(#111系)を、ブランドカラー(#009FE8/#003E86)寄りの
+     紺系ニュートラルに置き換える。フッター・コントロールバー・チャット等、
+     ライブラリのコンポーネント全般がこの--lk-bg系を土台にしているため、
+     ここで上書きするだけでアプリ全体の背景トーンが揃う */
+  --lk-bg: #0b1220;
+  --lk-bg2: #131c30;
+  --lk-bg3: #1b2740;
+  --lk-bg4: #233150;
+  --font-family: var(--font-body), 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-body), 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
 }
 
 /*
@@ -66,7 +79,7 @@
 
 html {
   color-scheme: dark;
-  background-color: #111;
+  background-color: #0b1220;
 }
 
 html,
