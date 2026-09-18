@@ -14,12 +14,18 @@ import {
   saveAudioOutputDeviceId,
   saveMicTestGain,
   saveSpeakerTestVolume,
+  type SinkCapableAudioElement,
 } from './audioOutput';
 import styles from '../styles/Home.module.css';
 
 export interface DeviceTestDialogProps {
   onClose: () => void;
 }
+
+type MicTestState = 'idle' | 'recording' | 'playing';
+
+/** 「マイクのテスト」は最大この秒数で自動的に録音を止め、再生に移る */
+const MIC_TEST_MAX_RECORDING_MS = 5000;
 
 /**
  * マイク・スピーカーの動作確認ダイアログ。アカウントメニューからいつでも開ける
@@ -39,6 +45,9 @@ export function DeviceTestDialog({ onClose }: DeviceTestDialogProps) {
   const [speakerLevel, setSpeakerLevel] = React.useState(0);
   const [speakerVolume, setSpeakerVolume] = React.useState(() => loadSpeakerTestVolume());
   const [micGain, setMicGain] = React.useState(() => loadMicTestGain());
+  const [micTestState, setMicTestState] = React.useState<MicTestState>('idle');
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const autoStopTimeoutRef = React.useRef<number | undefined>(undefined);
 
   const handlePreviewError = React.useCallback((e: Error) => {
     console.error('マイクのプレビュー取得に失敗しました', e);
@@ -84,6 +93,91 @@ export function DeviceTestDialog({ onClose }: DeviceTestDialogProps) {
     }
   };
 
+  React.useEffect(() => {
+    return () => {
+      window.clearTimeout(autoStopTimeoutRef.current);
+      const recorder = mediaRecorderRef.current;
+      if (recorder && recorder.state !== 'inactive') {
+        // アンマウント後に録音停止→再生が走らないよう先にハンドラを外す
+        recorder.onstop = null;
+        recorder.stop();
+      }
+    };
+  }, []);
+
+  /**
+   * 「● マイクのテスト」は押すと録音を開始し、もう一度押す(または5秒経過)と自動的に
+   * 停止して録音した音声を再生する。レベルメーターは「拾えているか」しか分からないため、
+   * 実際にエンコード・再生まで通しで確認できるようにしている。
+   */
+  const handleMicTestClick = () => {
+    if (micTestState === 'recording') {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+    if (micTestState !== 'idle' || !audioTrack?.mediaStreamTrack) return;
+    if (typeof MediaRecorder === 'undefined') {
+      console.error('このブラウザはMediaRecorderに対応していません');
+      return;
+    }
+
+    const stream = new MediaStream([audioTrack.mediaStreamTrack]);
+    let recorder: MediaRecorder;
+    try {
+      recorder = new MediaRecorder(stream);
+    } catch (e) {
+      console.error('マイクの録音開始に失敗しました', e);
+      return;
+    }
+
+    const chunks: BlobPart[] = [];
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+    recorder.onstop = async () => {
+      window.clearTimeout(autoStopTimeoutRef.current);
+      const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const audioEl: SinkCapableAudioElement = new Audio(url);
+
+      if (audioOutputDeviceId && typeof audioEl.setSinkId === 'function') {
+        try {
+          await audioEl.setSinkId(audioOutputDeviceId);
+        } catch (e) {
+          console.warn('録音音声の再生先切り替えに失敗しました。既定のデバイスで再生します', e);
+        }
+      }
+
+      const finish = () => {
+        URL.revokeObjectURL(url);
+        setMicTestState('idle');
+      };
+      audioEl.onended = finish;
+
+      setMicTestState('playing');
+      try {
+        await audioEl.play();
+      } catch (e) {
+        console.error('録音した音声の再生に失敗しました', e);
+        finish();
+      }
+    };
+
+    mediaRecorderRef.current = recorder;
+    recorder.start();
+    setMicTestState('recording');
+    autoStopTimeoutRef.current = window.setTimeout(() => {
+      if (recorder.state === 'recording') recorder.stop();
+    }, MIC_TEST_MAX_RECORDING_MS);
+  };
+
+  const micTestLabel =
+    micTestState === 'recording'
+      ? '■ 停止(録音中...)'
+      : micTestState === 'playing'
+        ? '▶ 再生中...'
+        : '● マイクのテスト';
+
   return (
     <div className={styles.dialogOverlay} onClick={onClose}>
       <div className={styles.dialogCard} onClick={(e) => e.stopPropagation()}>
@@ -125,7 +219,14 @@ export function DeviceTestDialog({ onClose }: DeviceTestDialogProps) {
             onActiveDeviceChange={handleAudioDeviceChange}
           />
           <div className={styles.deviceTestRow}>
-            <span className={styles.deviceTestIndicator}>● マイクのテスト</span>
+            <button
+              type="button"
+              className={`${styles.deviceTestIndicator}${micTestState === 'recording' ? ` ${styles.deviceTestIndicatorRecording}` : ''}`}
+              onClick={handleMicTestClick}
+              disabled={!audioTrack || micTestState === 'playing'}
+            >
+              {micTestLabel}
+            </button>
             <LevelMeterSegments level={micLevel} ariaLabel="マイク入力レベル" />
           </div>
           <span className={styles.volumeLabel}>入力音量</span>

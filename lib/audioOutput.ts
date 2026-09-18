@@ -58,7 +58,7 @@ export function loadMicTestGain(): number {
   }
 }
 
-type SinkCapableAudioElement = HTMLAudioElement & {
+export type SinkCapableAudioElement = HTMLAudioElement & {
   setSinkId?: (deviceId: string) => Promise<void>;
 };
 
