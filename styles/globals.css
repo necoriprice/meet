@@ -35,6 +35,35 @@
   font-size: min(4vw, 2.5rem);
 }
 
+/*
+ * タイル右上の「ピン留め」矢印アイコン(FocusToggle)は、コントロールバーの
+ * 「レイアウト」ドロップダウンに置き換えたため非表示にする。
+ * ライブラリの`ParticipantTile`が常に内部で描画してしまい、Reactのpropsでは
+ * 出し分けできないためCSSで隠している(クリックしても何も起きないよう
+ * CustomVideoConference側でも状態を参照しないようにしている)。
+ */
+.lk-focus-toggle-button {
+  display: none !important;
+}
+
+/*
+ * 「レイアウト」ドロップダウンで選んだ位置に応じて、一覧(サムネイル)の表示位置を変える。
+ * 既定(data属性なし/left)はライブラリ標準どおり左固定(1fr 5fr)のままにする。
+ */
+.lk-focus-layout[data-lk-layout-position='right'] {
+  grid-template-columns: 5fr 1fr;
+}
+.lk-focus-layout[data-lk-layout-position='right'] > .lk-carousel {
+  order: 2;
+}
+.lk-focus-layout[data-lk-layout-position='right'] > :not(.lk-carousel) {
+  order: 1;
+}
+.lk-focus-layout[data-lk-layout-position='top'] {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 5fr;
+}
+
 html {
   color-scheme: dark;
   background-color: #111;

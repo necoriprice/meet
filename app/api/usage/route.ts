@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { isUsageAdmin } from '@/lib/adminAccess';
 import { getRedis } from '@/lib/redis';
 import { NextResponse } from 'next/server';
 
@@ -16,6 +17,9 @@ export async function GET() {
   const session = await auth();
   if (!session?.user) {
     return new NextResponse('Unauthorized', { status: 401 });
+  }
+  if (!isUsageAdmin(session.user.email)) {
+    return new NextResponse('Forbidden', { status: 403 });
   }
 
   const redis = getRedis();

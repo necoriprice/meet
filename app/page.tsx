@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import { isUsageAdmin } from '@/lib/adminAccess';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
 import styles from '../styles/Home.module.css';
@@ -245,7 +246,7 @@ export default function Page() {
         {session?.user?.email && (
           <div className={styles.accountBar}>
             <span>{session.user.email}</span>
-            <a href="/usage">利用状況</a>
+            {isUsageAdmin(session.user.email) && <a href="/usage">利用状況</a>}
             <button className="lk-button" onClick={() => signOut({ callbackUrl: '/' })}>
               ログアウト
             </button>

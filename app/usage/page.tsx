@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { isUsageAdmin } from '@/lib/adminAccess';
 import styles from '../../styles/Usage.module.css';
 
 interface UsageSummary {
@@ -23,10 +25,13 @@ function formatDate(unixSeconds: number): string {
 }
 
 export default function UsagePage() {
+  const { data: session, status } = useSession();
   const [summary, setSummary] = useState<UsageSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isAdmin = isUsageAdmin(session?.user?.email);
 
   useEffect(() => {
+    if (!isAdmin) return;
     fetch('/api/usage')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -34,7 +39,23 @@ export default function UsagePage() {
       })
       .then((data) => setSummary(data.summary))
       .catch((err) => setError(err.message));
-  }, []);
+  }, [isAdmin]);
+
+  if (status === 'loading') {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return (
+      <main className={styles.main} data-lk-theme="default">
+        <Link href="/" className={styles.backLink}>
+          ← ホームに戻る
+        </Link>
+        <h1 className={styles.title}>利用状況</h1>
+        <p>このページを表示する権限がありません。</p>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.main} data-lk-theme="default">

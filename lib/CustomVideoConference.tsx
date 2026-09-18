@@ -5,6 +5,7 @@ import type {
   MessageDecoder,
   MessageEncoder,
   MessageFormatter,
+  ParticipantClickEvent,
   TrackReferenceOrPlaceholder,
   WidgetState,
 } from '@livekit/components-react';
@@ -14,7 +15,6 @@ import {
   CarouselLayout,
   ConnectionQualityIndicator,
   ConnectionStateToast,
-  ControlBar,
   FocusLayoutContainer,
   GridLayout,
   isTrackReference,
@@ -28,11 +28,12 @@ import {
   useCreateLayoutContext,
   useEnsureTrackRef,
   useIsEncrypted,
-  usePinnedTracks,
   useTracks,
   VideoTrack,
 } from '@livekit/components-react';
+import { CustomControlBar } from './CustomControlBar';
 import { ParticipantAvatar } from './ParticipantAvatar';
+import { LayoutMode, loadLayoutMode, saveLayoutMode } from './layoutMode';
 
 // `@livekit/components-core`は@livekit/components-reactの依存先であってこのアプリの
 // 直接の依存先ではないため(pnpmのphantom dependency制限)importできない。
@@ -47,19 +48,6 @@ function trackRefId(ref: TrackReferenceOrPlaceholder): string {
     : `${ref.participant.identity}_${ref.source}_placeholder`;
 }
 
-function isEqualTrackRef(
-  a?: TrackReferenceOrPlaceholder,
-  b?: TrackReferenceOrPlaceholder,
-): boolean {
-  if (a === undefined || b === undefined) {
-    return false;
-  }
-  if (isTrackReference(a) && isTrackReference(b)) {
-    return a.publication.trackSid === b.publication.trackSid;
-  }
-  return trackRefId(a) === trackRefId(b);
-}
-
 export interface CustomVideoConferenceProps extends React.HTMLAttributes<HTMLDivElement> {
   chatMessageFormatter?: MessageFormatter;
   chatMessageEncoder?: MessageEncoder;
@@ -68,10 +56,12 @@ export interface CustomVideoConferenceProps extends React.HTMLAttributes<HTMLDiv
 }
 
 /**
- * ライブラリ標準のVideoConferenceに、カメラオフ時のプレースホルダーだけを差し替えたもの。
- * `VideoConference`はタイルの中身をカスタマイズする手段を提供していないため、
- * `ParticipantTile`に自前のchildrenを渡す形でほぼ同じ構成を再実装している。
- * (差分は `<ParticipantPlaceholder />` → `<TileContent />` のみ)
+ * ライブラリ標準のVideoConferenceに対して以下2点をカスタマイズしたもの。
+ * 1. カメラオフ時のプレースホルダーをアカウントアバターに変更(ParticipantAvatar参照)
+ * 2. タイル右上の「ピン留め」矢印アイコンを廃止し、代わりに明示的な「レイアウト」ドロップダウン
+ *    (全画面/右/左/上)で一覧(サムネイル)の表示位置を選べるようにした。
+ *    メインに表示する相手は 画面共有 > 手動でクリックした人 > アクティブな発言者 > 先頭の人 の優先順位で決まる。
+ * `VideoConference`はどちらもカスタマイズする手段を提供していないため、ほぼ同じ構成を再実装している。
  */
 export function CustomVideoConference({
   chatMessageFormatter,
@@ -85,7 +75,18 @@ export function CustomVideoConference({
     unreadMessages: 0,
     showSettings: false,
   });
-  const lastAutoFocusedScreenShareTrack = React.useRef<TrackReferenceOrPlaceholder | null>(null);
+  const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>('grid');
+  const [manualPinIdentity, setManualPinIdentity] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setLayoutModeState(loadLayoutMode());
+  }, []);
+
+  const handleLayoutModeChange = (mode: LayoutMode) => {
+    setLayoutModeState(mode);
+    setManualPinIdentity(null);
+    saveLayoutMode(mode);
+  };
 
   const tracks = useTracks(
     [
@@ -101,55 +102,49 @@ export function CustomVideoConference({
 
   const layoutContext = useCreateLayoutContext();
 
-  const screenShareTracks = tracks
-    .filter(isTrackReference)
-    .filter((track) => track.publication.source === Track.Source.ScreenShare);
-
-  const focusTrack = usePinnedTracks(layoutContext)?.[0];
-  const carouselTracks = tracks.filter((track) => !isEqualTrackRef(track, focusTrack));
-
-  React.useEffect(() => {
-    if (
-      screenShareTracks.some((track) => track.publication.isSubscribed) &&
-      lastAutoFocusedScreenShareTrack.current === null
-    ) {
-      layoutContext.pin.dispatch?.({ msg: 'set_pin', trackReference: screenShareTracks[0] });
-      lastAutoFocusedScreenShareTrack.current = screenShareTracks[0];
-    } else if (
-      lastAutoFocusedScreenShareTrack.current &&
-      !screenShareTracks.some(
-        (track) =>
-          track.publication.trackSid ===
-          lastAutoFocusedScreenShareTrack.current?.publication?.trackSid,
-      )
-    ) {
-      layoutContext.pin.dispatch?.({ msg: 'clear_pin' });
-      lastAutoFocusedScreenShareTrack.current = null;
+  // 「右/左/上」レイアウト時のメインを決める: 画面共有 > 手動で選んだ人 > アクティブな発言者 > 先頭
+  const mainTrack = React.useMemo<TrackReferenceOrPlaceholder | undefined>(() => {
+    if (layoutMode === 'grid' || tracks.length === 0) {
+      return undefined;
     }
-    if (focusTrack && !isTrackReference(focusTrack)) {
-      const updatedFocusTrack = tracks.find(
-        (tr) =>
-          tr.participant.identity === focusTrack.participant.identity &&
-          tr.source === focusTrack.source,
-      );
-      if (updatedFocusTrack !== focusTrack && isTrackReference(updatedFocusTrack)) {
-        layoutContext.pin.dispatch?.({ msg: 'set_pin', trackReference: updatedFocusTrack });
+    const screenShare = tracks.find((t) => t.source === Track.Source.ScreenShare);
+    if (screenShare) {
+      return screenShare;
+    }
+    const cameraTracks = tracks.filter((t) => t.source === Track.Source.Camera);
+    if (manualPinIdentity) {
+      const pinned = cameraTracks.find((t) => t.participant.identity === manualPinIdentity);
+      if (pinned) {
+        return pinned;
       }
     }
-  }, [
-    screenShareTracks
-      .map((ref) => `${ref.publication.trackSid}_${ref.publication.isSubscribed}`)
-      .join(),
-    focusTrack?.publication?.trackSid,
-    tracks,
-  ]);
+    const speaking = cameraTracks.find((t) => t.participant.isSpeaking);
+    if (speaking) {
+      return speaking;
+    }
+    return cameraTracks[0] ?? tracks[0];
+  }, [layoutMode, tracks, manualPinIdentity]);
+
+  const sideTracks = React.useMemo(() => {
+    if (!mainTrack) {
+      return tracks;
+    }
+    const mainId = trackRefId(mainTrack);
+    return tracks.filter((t) => trackRefId(t) !== mainId);
+  }, [tracks, mainTrack]);
+
+  const handleThumbnailClick = (event: ParticipantClickEvent) => {
+    setManualPinIdentity(event.participant.identity);
+  };
+
+  const showFocusLayout = layoutMode !== 'grid' && !!mainTrack;
 
   return (
     <div className="lk-video-conference" {...props}>
       {isWeb() && (
         <LayoutContextProvider value={layoutContext} onWidgetChange={widgetUpdate}>
           <div className="lk-video-conference-inner">
-            {!focusTrack ? (
+            {!showFocusLayout ? (
               <div className="lk-grid-layout-wrapper">
                 <GridLayout tracks={tracks}>
                   <ParticipantTile>
@@ -159,21 +154,23 @@ export function CustomVideoConference({
               </div>
             ) : (
               <div className="lk-focus-layout-wrapper">
-                <FocusLayoutContainer>
-                  <CarouselLayout tracks={carouselTracks}>
-                    <ParticipantTile>
+                <FocusLayoutContainer data-lk-layout-position={layoutMode}>
+                  <CarouselLayout tracks={sideTracks}>
+                    <ParticipantTile onParticipantClick={handleThumbnailClick}>
                       <TileContent />
                     </ParticipantTile>
                   </CarouselLayout>
-                  {focusTrack && (
-                    <ParticipantTile trackRef={focusTrack}>
-                      <TileContent />
-                    </ParticipantTile>
-                  )}
+                  <ParticipantTile trackRef={mainTrack}>
+                    <TileContent />
+                  </ParticipantTile>
                 </FocusLayoutContainer>
               </div>
             )}
-            <ControlBar controls={{ chat: true, settings: !!SettingsComponent }} />
+            <CustomControlBar
+              showSettings={!!SettingsComponent}
+              layoutMode={layoutMode}
+              onLayoutModeChange={handleLayoutModeChange}
+            />
           </div>
           <Chat
             style={{ display: widgetState.showChat ? 'grid' : 'none' }}
