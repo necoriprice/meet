@@ -33,6 +33,7 @@ export default function Page() {
   const [checkingRoom, setCheckingRoom] = useState(false);
 
   const [newRoomPassword, setNewRoomPassword] = useState('');
+  const [newRoomPasswordEditing, setNewRoomPasswordEditing] = useState(false);
   const [creatingRoom, setCreatingRoom] = useState(false);
 
   const [fixedRoomHasPassword, setFixedRoomHasPassword] = useState(false);
@@ -155,7 +156,7 @@ export default function Page() {
         {status !== 'loading' && (
           <div className={styles.tabContent}>
             {fixedRoomId && (
-              <>
+              <div className={styles.actionBlock}>
                 <button
                   className="lk-button"
                   style={{ paddingBlock: '0.75rem' }}
@@ -163,26 +164,13 @@ export default function Page() {
                 >
                   ミーティングの開始
                 </button>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.5rem',
-                  }}
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setFixedRoomPasswordEditing((v) => !v)}
                 >
-                  <span className={styles.joinLabel}>
-                    {fixedRoomHasPassword ? '🔒 パスワード設定済み' : 'パスワード未設定'}
-                  </span>
-                  <button
-                    type="button"
-                    className="lk-button"
-                    style={{ fontSize: '0.8rem', paddingInline: '0.6rem' }}
-                    onClick={() => setFixedRoomPasswordEditing((v) => !v)}
-                  >
-                    {fixedRoomPasswordEditing ? '閉じる' : 'パスワードを設定'}
-                  </button>
-                </div>
+                  {fixedRoomHasPassword ? '🔒 パスワード設定済み(変更する)' : '🔒 パスワードを設定'}
+                </button>
                 {fixedRoomPasswordEditing && (
                   <form className={styles.joinForm} onSubmit={handleSaveFixedRoomPassword}>
                     <input
@@ -200,23 +188,34 @@ export default function Page() {
                 {fixedRoomPasswordMessage && (
                   <p className={styles.joinLabel}>{fixedRoomPasswordMessage}</p>
                 )}
-              </>
+              </div>
             )}
-            <button
-              className="lk-button"
-              style={{ paddingBlock: '0.75rem' }}
-              onClick={handleStartNewRoom}
-              disabled={creatingRoom}
-            >
-              {creatingRoom ? '作成中...' : '新規ミーティング'}
-            </button>
-            <input
-              className={styles.joinInput}
-              type="password"
-              placeholder="新規ミーティングのパスワード(任意)"
-              value={newRoomPassword}
-              onChange={(e) => setNewRoomPassword(e.target.value)}
-            />
+            <div className={styles.actionBlock}>
+              <button
+                className="lk-button"
+                style={{ paddingBlock: '0.75rem' }}
+                onClick={handleStartNewRoom}
+                disabled={creatingRoom}
+              >
+                {creatingRoom ? '作成中...' : '新規ミーティング'}
+              </button>
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setNewRoomPasswordEditing((v) => !v)}
+              >
+                {newRoomPassword ? '🔒 パスワード設定済み(変更する)' : '🔒 パスワードを設定'}
+              </button>
+              {newRoomPasswordEditing && (
+                <input
+                  className={styles.joinInput}
+                  type="password"
+                  placeholder="新規ミーティングのパスワード(任意)"
+                  value={newRoomPassword}
+                  onChange={(e) => setNewRoomPassword(e.target.value)}
+                />
+              )}
+            </div>
           </div>
         )}
         {status !== 'loading' && (
