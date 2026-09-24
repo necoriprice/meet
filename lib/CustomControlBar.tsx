@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { Track } from 'livekit-client';
+import { LocalTrackPublication, LocalVideoTrack, Track } from 'livekit-client';
 import {
   ChatIcon,
   ChatToggle,
@@ -10,11 +10,12 @@ import {
   MediaDeviceMenu,
   StartMediaButton,
   TrackToggle,
+  useLocalParticipant,
   useLocalParticipantPermissions,
   useMaybeLayoutContext,
   usePersistentUserChoices,
 } from '@livekit/components-react';
-import { BackgroundBlurToggle } from './BackgroundBlurToggle';
+import { CameraDeviceMenu } from './CameraDeviceMenu';
 import { LayoutMenu } from './LayoutMenu';
 import { LayoutMode } from './layoutMode';
 
@@ -47,6 +48,10 @@ export function CustomControlBar({
 }: CustomControlBarProps) {
   const layoutContext = useMaybeLayoutContext();
   const localPermissions = useLocalParticipantPermissions();
+  const { cameraTrack } = useLocalParticipant();
+  const cameraVideoTrack = (cameraTrack as LocalTrackPublication | undefined)?.track as
+    | LocalVideoTrack
+    | undefined;
   const browserSupportsScreenSharing = supportsScreenSharing();
 
   const canPublishSource = (source: Track.Source) => {
@@ -116,16 +121,13 @@ export function CustomControlBar({
             }
           />
           <div className="lk-button-group-menu">
-            <MediaDeviceMenu
-              kind="videoinput"
-              onActiveDeviceChange={(_kind, deviceId) =>
-                saveVideoInputDeviceId(deviceId ?? 'default')
-              }
+            <CameraDeviceMenu
+              track={cameraVideoTrack}
+              onActiveDeviceChange={(deviceId) => saveVideoInputDeviceId(deviceId ?? 'default')}
             />
           </div>
         </div>
       )}
-      {canPublishCamera && <BackgroundBlurToggle />}
       {canPublishScreenShare && browserSupportsScreenSharing && (
         <TrackToggle
           source={Track.Source.ScreenShare}

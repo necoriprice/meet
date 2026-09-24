@@ -5,6 +5,7 @@ import { facingModeFromLocalTrack, Track } from 'livekit-client';
 import { MediaDeviceMenu, TrackToggle, usePersistentUserChoices, usePreviewTracks } from '@livekit/components-react';
 import type { LocalUserChoices } from '@livekit/components-react';
 import { useSession } from 'next-auth/react';
+import { CameraDeviceMenu } from './CameraDeviceMenu';
 import { CameraOffAvatar } from './CameraOffAvatar';
 
 export interface CustomPreJoinProps {
@@ -147,12 +148,11 @@ export function CustomPreJoin({ defaults = {}, onSubmit, onError }: CustomPreJoi
             カメラ
           </TrackToggle>
           <div className="lk-button-group-menu">
-            <MediaDeviceMenu
+            <CameraDeviceMenu
               initialSelection={videoDeviceId}
-              kind="videoinput"
+              track={videoTrack}
               disabled={!videoTrack}
-              tracks={{ videoinput: videoTrack }}
-              onActiveDeviceChange={(_, id) => setVideoDeviceId(id)}
+              onActiveDeviceChange={(id) => setVideoDeviceId(id)}
             />
           </div>
         </div>
