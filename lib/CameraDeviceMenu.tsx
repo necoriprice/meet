@@ -24,7 +24,8 @@ export function CameraDeviceMenu({
   onActiveDeviceChange,
 }: CameraDeviceMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const popupRef = React.useRef<HTMLDivElement>(null);
   const { devices, activeDeviceId, setActiveMediaDevice } = useMediaDeviceSelect({
     kind: 'videoinput',
     track,
@@ -49,7 +50,8 @@ export function CameraDeviceMenu({
   React.useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (event.target === buttonRef.current) return;
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -58,10 +60,13 @@ export function CameraDeviceMenu({
   }, [isOpen]);
 
   return (
-    // 親の`.lk-button-group-menu`が`position:relative`を持つため、`display:contents`で
-    // このラッパー自体はレイアウトに影響させず、ポップアップの絶対配置の基準はそちらに任せる
-    <div ref={wrapperRef} style={{ display: 'contents' }}>
+    // ライブラリ標準の`MediaDeviceMenu`と同じくFragmentを返し、ボタンとポップアップを
+    // `.lk-button-group-menu`の直接の子にする。間に余計なラッパー要素を挟むと、
+    // マイク側と見た目を揃えている`.lk-button-group-menu > .lk-button`系のCSSが
+    // (子コンビネータのため)効かなくなり、カメラの▼だけ独立した見た目になってしまう。
+    <>
       <button
+        ref={buttonRef}
         type="button"
         className="lk-button lk-button-menu"
         aria-pressed={isOpen}
@@ -70,6 +75,7 @@ export function CameraDeviceMenu({
       />
       {isOpen && (
         <div
+          ref={popupRef}
           className="lk-list"
           style={{
             position: 'absolute',
@@ -105,6 +111,6 @@ export function CameraDeviceMenu({
           <BackgroundBlurSwitch track={track} />
         </div>
       )}
-    </div>
+    </>
   );
 }
