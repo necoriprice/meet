@@ -14,6 +14,7 @@ import {
   useMaybeLayoutContext,
   usePersistentUserChoices,
 } from '@livekit/components-react';
+import { BackgroundBlurToggle } from './BackgroundBlurToggle';
 import { LayoutMenu } from './LayoutMenu';
 import { LayoutMode } from './layoutMode';
 
@@ -124,6 +125,7 @@ export function CustomControlBar({
           </div>
         </div>
       )}
+      {canPublishCamera && <BackgroundBlurToggle />}
       {canPublishScreenShare && browserSupportsScreenSharing && (
         <TrackToggle
           source={Track.Source.ScreenShare}
