@@ -7,6 +7,12 @@ export interface RoomAccount {
   label: string;
 }
 
+/** このメールアドレスの本人専用ルーム(拠点共有アカウントの固定ルーム)かどうかを判定する */
+export function isFixedRoomOwner(email: string | undefined | null, roomName: string): boolean {
+  if (!email) return false;
+  return FIXED_ROOM_BY_EMAIL[email.toLowerCase()]?.roomId === roomName;
+}
+
 export const FIXED_ROOM_BY_EMAIL: Record<string, RoomAccount> = {
   'honsha1@riprice.co.jp': { roomId: 'honsha-room-1', label: '本社1ミーティングルーム' },
   'honsha2@riprice.co.jp': { roomId: 'honsha-room-2', label: '本社2ミーティングルーム' },

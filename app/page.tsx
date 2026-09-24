@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { AppHeader } from '@/lib/AppHeader';
 import { generateRoomId } from '@/lib/client-utils';
 import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
+import { rememberOwnRoomPassword } from '@/lib/ownRoomPassword';
 import styles from '../styles/Home.module.css';
 
 // 「ルーム名/room-idを含むURL」「ルーム名/room-idのみ」のどちらで入力されても
@@ -75,6 +76,8 @@ export default function Page() {
         }).catch(() => {
           // 設定に失敗してもルーム作成自体は継続する(パスワードなしになるだけ)
         });
+        // 作った本人にまで直後の入室でパスワード入力を求めないよう覚えておく
+        rememberOwnRoomPassword(roomId, password);
       }
       router.push(`/rooms/${roomId}`);
     } finally {

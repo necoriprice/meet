@@ -31,7 +31,7 @@ import {
 } from 'livekit-client';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { FIXED_ROOM_BY_EMAIL } from '@/lib/roomAccounts';
+import { FIXED_ROOM_BY_EMAIL, isFixedRoomOwner } from '@/lib/roomAccounts';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 
@@ -54,6 +54,14 @@ export function PageClientImpl(props: {
     setRoomPassword(password);
     setPasswordVerified(true);
   }, []);
+  // 本人専用の固定ルーム(拠点共有アカウント)は、自分でかけたパスワードを
+  // 自分自身の入室時にまで入力させる必要がないため、所有者本人ならゲート自体をスキップする
+  const isOwnFixedRoom = isFixedRoomOwner(session?.user?.email, props.roomName);
+  React.useEffect(() => {
+    if (isOwnFixedRoom) {
+      setPasswordVerified(true);
+    }
+  }, [isOwnFixedRoom]);
   const [preJoinChoices, setPreJoinChoices] = React.useState<LocalUserChoices | undefined>(
     undefined,
   );

@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { getLiveKitURL } from '@/lib/getLiveKitURL';
+import { isFixedRoomOwner } from '@/lib/roomAccounts';
 import { verifyRoomPassword } from '@/lib/roomPassword';
 import { ConnectionDetails } from '@/lib/types';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
@@ -41,10 +42,14 @@ export async function GET(request: NextRequest) {
     }
 
     // ルームにパスワードが設定されている場合、URLを知っているだけでは入室できないようにする
-    // (フロント側の入力画面はUXのためのもので、実際のアクセス制御はここで行う)
-    const password = request.nextUrl.searchParams.get('password') ?? '';
-    if (!(await verifyRoomPassword(roomName, password))) {
-      return new NextResponse('Incorrect room password', { status: 403 });
+    // (フロント側の入力画面はUXのためのもので、実際のアクセス制御はここで行う)。
+    // ただし本人専用の固定ルーム(拠点共有アカウント)は、自分でかけたパスワードを
+    // 自分自身の入室時にまで要求する必要がないため、所有者本人ならスキップする。
+    if (!isFixedRoomOwner(session.user.email, roomName)) {
+      const password = request.nextUrl.searchParams.get('password') ?? '';
+      if (!(await verifyRoomPassword(roomName, password))) {
+        return new NextResponse('Incorrect room password', { status: 403 });
+      }
     }
 
     // Generate participant token
