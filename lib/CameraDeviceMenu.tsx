@@ -35,7 +35,7 @@ export function CameraDeviceMenu({
     kind: 'videoinput',
     track,
   });
-  const { mode, setMode, strength, setStrength, images, imagePath, setImagePath, addCustomImage } =
+  const { mode, setMode, blurRadius, setBlurRadius, images, imagePath, setImagePath, addCustomImage } =
     useBackgroundEffect(track);
 
   const appliedInitialSelection = React.useRef(false);
@@ -136,8 +136,8 @@ export function CameraDeviceMenu({
         <VideoEffectsDialog
           mode={mode}
           onModeChange={setMode}
-          strength={strength}
-          onStrengthChange={setStrength}
+          blurRadius={blurRadius}
+          onBlurRadiusChange={setBlurRadius}
           images={images}
           imagePath={imagePath}
           onImagePathChange={setImagePath}

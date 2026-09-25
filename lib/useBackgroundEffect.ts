@@ -6,13 +6,10 @@ import Desk from '../public/background-images/samantha-gades-BlIhVfXbi9s-unsplas
 import Nature from '../public/background-images/ali-kazal-tbw_KQE3Cbg-unsplash.jpg';
 
 export type BackgroundEffectMode = 'none' | 'blur' | 'image';
-export type BlurStrength = 'weak' | 'normal' | 'strong';
 
-export const BLUR_RADIUS_BY_STRENGTH: Record<BlurStrength, number> = {
-  weak: 5,
-  normal: 10,
-  strong: 20,
-};
+export const BLUR_RADIUS_MIN = 2;
+export const BLUR_RADIUS_MAX = 30;
+export const BLUR_RADIUS_DEFAULT = 10;
 
 export const BACKGROUND_IMAGES = [
   { name: 'デスク', path: Desk.src },
@@ -28,7 +25,7 @@ export const BACKGROUND_IMAGES = [
  */
 export function useBackgroundEffect(track?: LocalVideoTrack) {
   const [mode, setMode] = React.useState<BackgroundEffectMode>('none');
-  const [strength, setStrength] = React.useState<BlurStrength>('normal');
+  const [blurRadius, setBlurRadius] = React.useState(BLUR_RADIUS_DEFAULT);
   const [images, setImages] = React.useState(() => [...BACKGROUND_IMAGES]);
   const [imagePath, setImagePath] = React.useState(BACKGROUND_IMAGES[0].path);
   const createdObjectUrls = React.useRef<string[]>([]);
@@ -36,13 +33,13 @@ export function useBackgroundEffect(track?: LocalVideoTrack) {
   React.useEffect(() => {
     if (!track) return;
     if (mode === 'blur') {
-      track.setProcessor(BackgroundBlur(BLUR_RADIUS_BY_STRENGTH[strength]));
+      track.setProcessor(BackgroundBlur(blurRadius));
     } else if (mode === 'image') {
       track.setProcessor(VirtualBackground(imagePath));
     } else {
       track.stopProcessor();
     }
-  }, [track, mode, strength, imagePath]);
+  }, [track, mode, blurRadius, imagePath]);
 
   // タブを離れる際にアップロード画像のobject URLを解放する(追加した画像自体は消さない)
   React.useEffect(() => {
@@ -63,8 +60,8 @@ export function useBackgroundEffect(track?: LocalVideoTrack) {
   return {
     mode,
     setMode,
-    strength,
-    setStrength,
+    blurRadius,
+    setBlurRadius,
     images,
     imagePath,
     setImagePath,
