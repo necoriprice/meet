@@ -57,26 +57,50 @@ body {
   font-size: min(4vw, 2.5rem);
 }
 
-/* カメラの▼メニュー内の背景効果パネル(なし/ぼかし/画像の切り替え。Zoom等を参考) */
-.lk-background-effects {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem;
-}
-
-.lk-segmented-row {
+/* カメラの▼メニュー内「背景をぼかす」のON/OFFスイッチ(Zoom等を参考) */
+.lk-switch-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.lk-segmented-label {
+  gap: 0.75rem;
+  padding: 0.4rem 0.5rem;
   font-size: 0.85rem;
   white-space: nowrap;
 }
 
+.lk-switch {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 2px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.lk-switch[aria-checked='true'] {
+  background: var(--lk-accent-bg, #009fe8);
+}
+
+.lk-switch-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateX(0);
+  transition: transform 0.15s ease;
+}
+
+.lk-switch[aria-checked='true'] .lk-switch-thumb {
+  transform: translateX(14px);
+}
+
+/* 「ビデオとエフェクト」ダイアログ内の背景効果・強さ切り替え(Zoom等を参考) */
 .lk-segmented {
   display: inline-flex;
   gap: 2px;

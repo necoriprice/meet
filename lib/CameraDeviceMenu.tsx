@@ -2,7 +2,9 @@
 import * as React from 'react';
 import { useMediaDeviceSelect } from '@livekit/components-react';
 import type { LocalVideoTrack } from 'livekit-client';
-import { BackgroundEffectsPanel } from './BackgroundEffectsPanel';
+import { BackgroundBlurSwitch } from './BackgroundBlurSwitch';
+import { useBackgroundEffect } from './useBackgroundEffect';
+import { VideoEffectsDialog } from './VideoEffectsDialog';
 
 export interface CameraDeviceMenuProps {
   track?: LocalVideoTrack;
@@ -14,8 +16,10 @@ export interface CameraDeviceMenuProps {
 /**
  * カメラの▼メニュー。ライブラリ標準の`MediaDeviceMenu`はデバイス一覧のポップアップしか
  * 出せず独自の項目を追加できないため、`useMediaDeviceSelect`で同じ見た目のポップアップを
- * 自作し、デバイス一覧の下に背景効果パネル(ぼかし/画像)を追加する(Zoom等と同じくカメラの
- * 設定メニューにまとめる形。通話中・プレルームどちらからも使う。2026-09-24、菅原さん指示)。
+ * 自作し、デバイス一覧の下に「背景をぼかす」の簡易スイッチと「ビデオとエフェクト」を
+ * 追加する(Zoom等と同じくカメラの設定メニューにまとめる形。通話中・プレルームどちらからも
+ * 使う。2026-09-24、菅原さん指示)。ぼかしの強さ・背景画像の選択は小さいポップアップに
+ * 詰め込みすぎとの指摘を受け、`VideoEffectsDialog`に分離している。
  */
 export function CameraDeviceMenu({
   track,
@@ -24,12 +28,15 @@ export function CameraDeviceMenu({
   onActiveDeviceChange,
 }: CameraDeviceMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isEffectsDialogOpen, setIsEffectsDialogOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const popupRef = React.useRef<HTMLDivElement>(null);
   const { devices, activeDeviceId, setActiveMediaDevice } = useMediaDeviceSelect({
     kind: 'videoinput',
     track,
   });
+  const { mode, setMode, strength, setStrength, imagePath, setImagePath } =
+    useBackgroundEffect(track);
 
   const appliedInitialSelection = React.useRef(false);
   React.useEffect(() => {
@@ -108,8 +115,33 @@ export function CameraDeviceMenu({
             ))}
           </ul>
           <hr style={{ margin: '0.4rem 0', border: 'none', borderTop: '1px solid rgba(255,255,255,0.12)' }} />
-          <BackgroundEffectsPanel track={track} />
+          <BackgroundBlurSwitch
+            enabled={mode !== 'none'}
+            onChange={(enabled) => setMode(enabled ? 'blur' : 'none')}
+          />
+          <button
+            type="button"
+            className="lk-button"
+            style={{ width: '100%', justifyContent: 'flex-start' }}
+            onClick={() => {
+              setIsEffectsDialogOpen(true);
+              setIsOpen(false);
+            }}
+          >
+            ビデオとエフェクト
+          </button>
         </div>
+      )}
+      {isEffectsDialogOpen && (
+        <VideoEffectsDialog
+          mode={mode}
+          onModeChange={setMode}
+          strength={strength}
+          onStrengthChange={setStrength}
+          imagePath={imagePath}
+          onImagePathChange={setImagePath}
+          onClose={() => setIsEffectsDialogOpen(false)}
+        />
       )}
     </>
   );
