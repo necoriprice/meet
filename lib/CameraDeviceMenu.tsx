@@ -35,7 +35,7 @@ export function CameraDeviceMenu({
     kind: 'videoinput',
     track,
   });
-  const { mode, setMode, strength, setStrength, imagePath, setImagePath } =
+  const { mode, setMode, strength, setStrength, images, imagePath, setImagePath, addCustomImage } =
     useBackgroundEffect(track);
 
   const appliedInitialSelection = React.useRef(false);
@@ -138,8 +138,10 @@ export function CameraDeviceMenu({
           onModeChange={setMode}
           strength={strength}
           onStrengthChange={setStrength}
+          images={images}
           imagePath={imagePath}
           onImagePathChange={setImagePath}
+          onAddImage={addCustomImage}
           onClose={() => setIsEffectsDialogOpen(false)}
         />
       )}

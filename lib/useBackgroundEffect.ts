@@ -29,7 +29,9 @@ export const BACKGROUND_IMAGES = [
 export function useBackgroundEffect(track?: LocalVideoTrack) {
   const [mode, setMode] = React.useState<BackgroundEffectMode>('none');
   const [strength, setStrength] = React.useState<BlurStrength>('normal');
+  const [images, setImages] = React.useState(() => [...BACKGROUND_IMAGES]);
   const [imagePath, setImagePath] = React.useState(BACKGROUND_IMAGES[0].path);
+  const createdObjectUrls = React.useRef<string[]>([]);
 
   React.useEffect(() => {
     if (!track) return;
@@ -42,5 +44,30 @@ export function useBackgroundEffect(track?: LocalVideoTrack) {
     }
   }, [track, mode, strength, imagePath]);
 
-  return { mode, setMode, strength, setStrength, imagePath, setImagePath };
+  // タブを離れる際にアップロード画像のobject URLを解放する(追加した画像自体は消さない)
+  React.useEffect(() => {
+    return () => {
+      createdObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  const addCustomImage = React.useCallback((file: File) => {
+    const url = URL.createObjectURL(file);
+    createdObjectUrls.current.push(url);
+    const name = file.name.replace(/\.[^./]+$/, '') || 'カスタム背景';
+    setImages((prev) => [...prev, { name, path: url }]);
+    setImagePath(url);
+    setMode('image');
+  }, []);
+
+  return {
+    mode,
+    setMode,
+    strength,
+    setStrength,
+    images,
+    imagePath,
+    setImagePath,
+    addCustomImage,
+  };
 }

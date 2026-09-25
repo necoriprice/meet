@@ -127,16 +127,17 @@ body {
 
 .lk-background-image-grid {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 .lk-background-image-thumb {
   position: relative;
-  width: 72px;
-  height: 48px;
+  width: 160px;
+  height: 100px;
   padding: 0;
   border: 2px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   background-size: cover;
   background-position: center;
   cursor: pointer;
@@ -149,13 +150,41 @@ body {
 
 .lk-background-image-thumb span {
   position: absolute;
-  left: 4px;
-  bottom: 2px;
-  padding: 1px 4px;
-  border-radius: 3px;
+  left: 6px;
+  bottom: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+}
+
+.lk-background-image-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 160px;
+  height: 100px;
+  padding: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d6ecfb;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.lk-background-image-add:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.lk-background-image-add-icon {
+  font-size: 1.4rem;
+  line-height: 1;
 }
 
 /* デバイステストダイアログの区切りバー式レベルメーター(Windowsのサウンド設定を参考) */
