@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useMediaDeviceSelect } from '@livekit/components-react';
 import type { LocalVideoTrack } from 'livekit-client';
-import { BackgroundBlurSwitch } from './BackgroundBlurSwitch';
+import { BackgroundEffectsPanel } from './BackgroundEffectsPanel';
 
 export interface CameraDeviceMenuProps {
   track?: LocalVideoTrack;
@@ -14,7 +14,7 @@ export interface CameraDeviceMenuProps {
 /**
  * カメラの▼メニュー。ライブラリ標準の`MediaDeviceMenu`はデバイス一覧のポップアップしか
  * 出せず独自の項目を追加できないため、`useMediaDeviceSelect`で同じ見た目のポップアップを
- * 自作し、デバイス一覧の下に「背景をぼかす」スイッチを追加する(Zoom等と同じくカメラの
+ * 自作し、デバイス一覧の下に背景効果パネル(ぼかし/画像)を追加する(Zoom等と同じくカメラの
  * 設定メニューにまとめる形。通話中・プレルームどちらからも使う。2026-09-24、菅原さん指示)。
  */
 export function CameraDeviceMenu({
@@ -82,7 +82,7 @@ export function CameraDeviceMenu({
             bottom: 'calc(100% + 6px)',
             right: 0,
             width: 'max-content',
-            minWidth: '12rem',
+            minWidth: '14rem',
             padding: '0.5rem',
             background: 'var(--lk-bg2, #1f1f1f)',
             border: '1px solid var(--lk-border-color, rgba(255,255,255,0.15))',
@@ -108,7 +108,7 @@ export function CameraDeviceMenu({
             ))}
           </ul>
           <hr style={{ margin: '0.4rem 0', border: 'none', borderTop: '1px solid rgba(255,255,255,0.12)' }} />
-          <BackgroundBlurSwitch track={track} />
+          <BackgroundEffectsPanel track={track} />
         </div>
       )}
     </>
